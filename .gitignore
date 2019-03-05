@@ -59,3 +59,25 @@ typings/
 
 # next.js build output
 .next
+
+# ReasonML Projects
+.DS_Store
+.merlin
+.bsb.lock
+packages/**/lib/bs
+packages/**/lib/ocaml
+packages/**/lib/babel
+examples/**/lib/bs
+examples/**/lib/babel
+*.bs.js
+build/
+
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+.pnp/
+.pnp.js
+
+.reasonql/
