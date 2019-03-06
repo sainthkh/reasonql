@@ -17,7 +17,7 @@ type c_C = {
   ss: option(string),
 };
 
-type document = {
+type queryResponse = {
   i: int,
   a: option(a_A),
   s: option(string),
@@ -37,5 +37,5 @@ type queryVars = {
 
 let encodeVariables: queryVars => variablesType = (vars) => variablesType(~j=vars.j,~ss=vars.ss);
 
-type schemaQueryResponse = SchemaTypes.document;
+type schemaQueryResponse = SchemaTypes.queryResponse;
 let decodeResponse = SchemaTypes.decodeQueryResponse;

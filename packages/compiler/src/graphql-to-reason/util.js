@@ -20,7 +20,7 @@ ${
 
 function handleRootNames(name) {
   let rootNames = {
-    "query": "document",
+    "query": "queryResponse",
     "mutation": "mutationResponse",
     "subscription": "subscriptionResponse",
   };

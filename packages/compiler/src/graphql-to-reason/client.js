@@ -73,7 +73,7 @@ ${generateTypeCode(typeList)}
 
 ${generateVariablesEncoder(args)}
 
-type schemaQueryResponse = SchemaTypes.document;
+type schemaQueryResponse = SchemaTypes.queryResponse;
 let decodeResponse = SchemaTypes.decodeQueryResponse;
 `.trim();
 }

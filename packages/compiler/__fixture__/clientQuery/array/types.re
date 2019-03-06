@@ -18,7 +18,7 @@ type p4_Person = {
   name: string,
 };
 
-type document = {
+type queryResponse = {
   i1: option(array(option(int))),
   i2: array(option(int)),
   i3: option(array(int)),
@@ -32,5 +32,5 @@ type document = {
 type variablesType = Js.Dict.t(Js.Json.t);
 let encodeVariables: unit => variablesType = () => Js.Dict.empty();
 
-type schemaQueryResponse = SchemaTypes.document;
+type schemaQueryResponse = SchemaTypes.queryResponse;
 let decodeResponse = SchemaTypes.decodeQueryResponse;

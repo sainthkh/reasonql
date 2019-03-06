@@ -38,7 +38,7 @@ ${commentOnTop()}
 
 ${generateTypeCode(typeList)}
 
-[@bs.module "./SchemaTypes.codec"]external decodeQueryResponse: Js.Json.t => document = "decodeQueryResponse";
+[@bs.module "./SchemaTypes.codec"]external decodeQueryResponse: Js.Json.t => queryResponse = "decodeQueryResponse";
 `.trim();
 }
 

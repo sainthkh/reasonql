@@ -17,11 +17,11 @@ type c = {
   ss: option(string),
 };
 
-type document = {
+type queryResponse = {
   i: int,
   a: option(a),
   s: option(string),
   c: c,
 };
 
-[@bs.module "./SchemaTypes.codec"]external decodeQueryResponse: Js.Json.t => document = "decodeQueryResponse";
+[@bs.module "./SchemaTypes.codec"]external decodeQueryResponse: Js.Json.t => queryResponse = "decodeQueryResponse";
