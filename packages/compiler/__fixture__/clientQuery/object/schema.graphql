@@ -1,0 +1,23 @@
+type Query {
+  i: Int!,
+  a(j: Int!): A,
+  s: String,
+  c(ss: String): C!,
+}
+
+type A {
+  id: ID!,
+  ii: Int,
+  b: B!,
+  ff: Float!,
+}
+
+type B {
+  id: ID!,
+  iii: Int,
+}
+
+type C {
+  id: ID!,
+  ss: String,
+}

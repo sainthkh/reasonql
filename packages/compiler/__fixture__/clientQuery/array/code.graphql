@@ -1,0 +1,20 @@
+query types {
+  i1
+  i2
+  i3
+  i4
+  p1 {
+    id
+    name
+  }
+  p2 {
+    name
+  }
+  p3 {
+    id
+  }
+  p4 {
+    id
+    name
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@reasonql/core",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "bsb -make-world",
+    "start": "bsb -make-world -w",
+    "clean": "bsb -clean-world",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "BuckleScript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bs-fetch": "^0.3.1",
+    "reason-future": "^2.4.0"
+  },
+  "devDependencies": {
+    "bs-platform": "^4.0.18"
+  }
+}

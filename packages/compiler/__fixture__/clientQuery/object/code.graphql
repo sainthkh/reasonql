@@ -1,0 +1,17 @@
+query types($j: Int!, $ss: String) {
+  i
+  a(j:$j) {
+    id
+    ii
+    b {
+      id
+      iii
+    }
+    ff
+  }
+  s
+  c(ss:$ss) {
+    id
+    ss
+  }
+}

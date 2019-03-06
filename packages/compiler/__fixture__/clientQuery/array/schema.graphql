@@ -1,0 +1,15 @@
+type Query {
+  i1: [Int],
+  i2: [Int]!,
+  i3: [Int!],
+  i4: [Int!]!,
+  p1: [Person],
+  p2: [Person]!,
+  p3: [Person!],
+  p4: [Person!]!,
+}
+
+type Person {
+  id: ID!,
+  name: String!,
+}
