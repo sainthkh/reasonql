@@ -5,7 +5,7 @@ type person = {
   name: string,
 };
 
-type queryResponse = {
+type document = {
   i1: option(array(option(int))),
   i2: array(option(int)),
   i3: option(array(int)),
@@ -16,4 +16,4 @@ type queryResponse = {
   p4: array(person),
 };
 
-[@bs.module "./SchemaTypes.codec"]external decodeQueryResponse: Js.Json.t => queryResponse = "decodeQueryResponse";
+[@bs.module "./SchemaTypes.codec"]external decodeQueryResponse: Js.Json.t => document = "decodeQueryResponse";
