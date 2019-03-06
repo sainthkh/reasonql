@@ -30,7 +30,7 @@ type queryResponse = {
 };
 
 type variablesType = Js.Dict.t(Js.Json.t);
-let encodeVariables: unit => variablesType = () => Js.Dict.empty();
+let encodeVariables: variablesType => Js.Json.t = vars => Js.Json.object_(vars);
 
 type schemaQueryResponse = SchemaTypes.queryResponse;
 let decodeResponse = SchemaTypes.decodeQueryResponse;

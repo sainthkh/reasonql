@@ -6,8 +6,8 @@ function generateTypeCode(typeList) {
   return typeList.map(type => {
     let name = lowerTheFirstCharacter(type.name);
     name = handleRootNames(name);
-    return `
-type ${name} = {
+    return (type.abstract ? `[@bs.deriving abstract]\n` : ``)
++ `type ${name} = {
 ${
   type.fields.map(field => {
     return `  ${field.name}: ${decodeTypeName(field)},`

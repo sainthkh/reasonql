@@ -57,6 +57,7 @@ function argumentTypes(args) {
     types.push({
       name: 'queryVars',
       fields,
+      abstract: true,
     });
 
     return types;
@@ -81,15 +82,14 @@ let decodeResponse = SchemaTypes.decodeQueryResponse;
 function generateVariablesEncoder(args) {
   if(args.length > 0) {
     return `
-[@bs.deriving abstract]
 ${generateTypeCode(args)}
 
-let encodeVariables: queryVars => variablesType = (vars) => variablesType(${generateVaraiblesArgs(args[0].fields)});
+let encodeVariables: variablesType => queryVars = (vars) => variablesType(${generateVaraiblesArgs(args[0].fields)});
 `.trim();
   } else {
     return `
 type variablesType = Js.Dict.t(Js.Json.t);
-let encodeVariables: unit => variablesType = () => Js.Dict.empty();
+let encodeVariables: variablesType => Js.Json.t = vars => Js.Json.object_(vars);
 `.trim();
   }
 }
