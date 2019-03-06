@@ -10,7 +10,11 @@ const getDirectories = source =>
   .map(name => path.join(source, name))
   .filter(isDirectory)
 
-getDirectories('./examples').forEach(dir => {
-  fs.copyFileSync('./scripts/apollo-reasonml-compiler', path.join(dir, 'client/node_modules/.bin', 'apollo-reasonml-compiler'));
-  fs.copyFileSync('./scripts/apollo-reasonml-compiler.cmd', path.join(dir, 'client/node_modules/.bin', 'apollo-reasonml-compiler.cmd'));
-})
+const copyScripts = dir => 
+  getDirectories(dir).forEach(dir => {
+    fs.copyFileSync('./scripts/reasonql-compiler', path.join(dir, 'client/node_modules/.bin', 'reasonql-compiler'));
+    fs.copyFileSync('./scripts/reasonql-compiler.cmd', path.join(dir, 'client/node_modules/.bin', 'reasonql-compiler.cmd'));
+  })
+
+copyScripts('./examples')
+copyScripts('./snippets')
