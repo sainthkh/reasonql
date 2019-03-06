@@ -14,6 +14,7 @@
   "suffix": ".bs.js",
   "namespace": true,
   "bs-dependencies": [
+    "@reasonql/core",
     "reason-react"
   ],
   "refmt": 3

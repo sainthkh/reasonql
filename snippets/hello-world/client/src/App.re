@@ -5,11 +5,11 @@ type queryStatus =
 
 type state = {
   status: queryStatus,
-  data: option(AppQuery.document),
+  data: option(AppQuery.schemaQueryResponse),
 }
 
 type action = 
-  | Fetched(AppQuery.document)
+  | Fetched(AppQuery.schemaQueryResponse)
 
 let component = ReasonReact.reducerComponent("App");
 
@@ -21,7 +21,9 @@ let query = ReasonQL.gql({|
   }
 |})
 
-module Request = ReasonQL.MakeRequest(AppQuery);
+module Request = ReasonQL.MakeRequest(AppQuery, {
+  let url = "http://localhost:4000";
+});
 
 let make = (_children) => {
   ...component,
@@ -31,25 +33,30 @@ let make = (_children) => {
   },
 
   didMount: self => {
-    Request.send()
+    Request.send(Js.Dict.empty())
     ->Request.finished(data => {
       self.send(Fetched(data));
     })
   },
 
-  reducer: (action, state) => {
+  reducer: (action, _state) => {
     switch(action) {
-    | Fetched(response) => ReasonReact.Update({ status: Data, data: response.data })
+    | Fetched(data) => ReasonReact.Update({ status: Data, data: Some(data) })
     }
   },
 
   render: self => {
-    let data = Belt.Option.getExn(self.state.data);
-
     switch(self.state.status) {
     | Loading => { ReasonReact.string("Loading") }
     | Error => { ReasonReact.string("Error") }
-    | Data => { ReasonReact.string(data.hello.message) }
+    | Data => { 
+      let data = Belt.Option.getExn(self.state.data);
+      
+      switch(data.hello) {
+      | Some(hello) => { ReasonReact.string(hello.message) }
+      | None => { ReasonReact.string("message not found") }
+      }
+    }
     }
   }
 }

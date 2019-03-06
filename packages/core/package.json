@@ -13,7 +13,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "bs-fetch": "^0.3.1",
+    "@aantron/repromise": "^0.6.0",
     "reason-future": "^2.4.0"
   },
   "devDependencies": {
