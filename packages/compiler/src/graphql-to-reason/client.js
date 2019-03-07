@@ -66,9 +66,13 @@ function argumentTypes(args) {
   }
 }
 
-function generateReasonCode(typeList, args) {
+function generateReasonCode(code, typeList, args) {
   return `
 ${commentOnTop()}
+
+let query = {|
+${code}
+|}
 
 ${generateTypeCode(typeList)}
 
@@ -98,9 +102,9 @@ function generateVaraiblesArgs(fields) {
   return fields.map(field => `~${field.name}=vars.${field.name}`).join(',')
 }
 
-exports.queryToReason = function(ast, typeMap) {
+exports.queryToReason = function(ast, code, typeMap) {
   let queryRoot = ast.definitions[0];
   let typeList = generateTypeListFromQuery(queryRoot, typeMap);
   let args = argumentTypes(queryRoot.variableDefinitions);
-  return generateReasonCode(typeList, args);
+  return generateReasonCode(code, typeList, args);
 }

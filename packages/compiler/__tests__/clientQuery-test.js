@@ -25,8 +25,9 @@ describe(`client query tests`, () => {
     let typeMap = createTypeMap(schemaAst);
     
     let codePath = path.join(fixture, 'code.graphql');
-    let ast = parse(fs.readFileSync(codePath).toString());
-    let code = queryToReason(ast, typeMap);
+    let gqlCode = fs.readFileSync(codePath).toString();
+    let ast = parse(gqlCode);
+    let code = queryToReason(ast, gqlCode, typeMap);
     let reason = fs.readFileSync(path.join(fixture, 'types.re')).toString();
     
     compareTexts(`${path.basename(fixture)} test`, code, reason);

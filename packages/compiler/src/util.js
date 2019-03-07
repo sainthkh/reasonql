@@ -120,14 +120,13 @@ function generateTypeFiles({include, exclude, watch, src}, ast) {
 
 function generateTypeFile(gqlCode, typeMap) {
   let ast = parse(gqlCode.template);
-  let code = queryToReason(ast, typeMap);
+  let code = queryToReason(ast, gqlCode.template, typeMap);
   fs.writeFileSync(path.join(DEST_DIR, `${ast.definitions[0].name.value}.re`), code);
 }
 
 module.exports = {
   loadConfig,
   loadServerSchema,
-  extendWithClientSchema,
   generateSchemaTypes,
   generateTypeFiles,
   generateTypeFile,
