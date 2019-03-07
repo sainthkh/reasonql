@@ -85,10 +85,6 @@ function loadServerSchema({ schema }) {
   return ast;
 }
 
-function extendWithClientSchema({client}, ast) {
-  return ast;
-}
-
 const DEST_DIR = './src/.reasonql';
 fs.ensureDirSync(DEST_DIR);
 
