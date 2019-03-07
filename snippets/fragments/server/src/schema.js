@@ -9,7 +9,7 @@ type Post {
 }
 
 type Query {
-  posts: [Post!]
+  posts: [Post!]!
 }
 `
 

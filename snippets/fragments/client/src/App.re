@@ -1,6 +1,5 @@
 type queryStatus = 
   | Loading
-  | Error
   | Data
 
 type state = {
@@ -15,8 +14,10 @@ let component = ReasonReact.reducerComponent("App");
 
 let query = ReasonQL.gql({|
   query AppQuery {
-    hello {
-      message
+    posts {
+      title
+      summary
+      slug
     }
   }
 |})
@@ -46,17 +47,25 @@ let make = (_children) => {
   },
 
   render: self => {
-    switch(self.state.status) {
-    | Loading => { ReasonReact.string("Loading") }
-    | Error => { ReasonReact.string("Error") }
-    | Data => { 
-      let data = Belt.Option.getExn(self.state.data);
-      
-      switch(data.hello) {
-      | Some(hello) => { ReasonReact.string(hello.message) }
-      | None => { ReasonReact.string("message not found") }
+    <>
+      <h1> { ReasonReact.string("Awesome Movie Review Blog") } </h1>
+      <div> 
+      {
+        switch(self.state.status) {
+        | Loading => { ReasonReact.string("Loading") }
+        | Data => { 
+          let data = Belt.Option.getExn(self.state.data);
+          
+          switch(data.posts->Array.length) {
+          | 0 => { ReasonReact.string("no posts here.") }
+          | _ => data.posts |> Array.map((post:SchemaTypes.post) => {
+            <Post key=post.slug response={ post: post } />
+          }) |> ReasonReact.array
+          }
+        }
+        }
       }
-    }
-    }
+      </div>
+    </>
   }
 }

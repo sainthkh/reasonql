@@ -69,6 +69,7 @@ packages/**/lib/ocaml
 packages/**/lib/babel
 examples/**/lib/bs
 examples/**/lib/babel
+snippets/**/lib/bs
 *.bs.js
 build/
 
