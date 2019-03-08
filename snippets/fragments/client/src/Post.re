@@ -1,3 +1,12 @@
+let query = ReasonQL.gql({|
+  fragment PostFragment_post on Post {
+    title
+    summary
+    slug
+    ...ButtonFragment_post
+  }
+|})
+
 let component = ReasonReact.statelessComponent("Post")
 
 let make = (

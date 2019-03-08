@@ -15,9 +15,7 @@ let component = ReasonReact.reducerComponent("App");
 let query = ReasonQL.gql({|
   query AppQuery {
     posts {
-      title
-      summary
-      slug
+      ...PostFragment_post
     }
   }
 |})
