@@ -112,16 +112,22 @@ function generateTypeFiles({include, exclude, watch, src}, ast) {
     let code = fs.readFileSync(path.join(src, filePath)).toString();
     gqlCodes = gqlCodes.concat(findTags(code));
   });
+
+  let nodes = gqlCodes.map(code => {
+    return {
+      code: code.template,
+      ast: parse(code.template),
+    }
+  });
   
-  gqlCodes.forEach(code => {
-    generateTypeFile(code, typeMap);
+  nodes.forEach(node => {
+    generateTypeFile(node, typeMap);
   })
 }
 
-function generateTypeFile(gqlCode, typeMap) {
-  let ast = parse(gqlCode.template);
-  let code = queryToReason(ast, gqlCode.template, typeMap);
-  fs.writeFileSync(path.join(DEST_DIR, `${ast.definitions[0].name.value}.re`), code);
+function generateTypeFile(node, typeMap) {
+  let code = queryToReason(node, typeMap);
+  fs.writeFileSync(path.join(DEST_DIR, `${node.ast.definitions[0].name.value}.re`), code);
 }
 
 module.exports = {
