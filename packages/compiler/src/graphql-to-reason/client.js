@@ -75,6 +75,7 @@ function argumentTypes(args) {
     return decodeField(arg);
   })
 
+  let list = [];
   if (fields.length > 0) {
     let types = [];
     types.push({
@@ -87,13 +88,24 @@ function argumentTypes(args) {
       abstract: true,
     });
 
-    return types;
-  } else {
-    return [];
+    list = types;
+  }
+
+  let map = {};
+
+  list.forEach(type => {
+    map[type.name] = type;
+  })
+
+  return {
+    list, 
+    map,
+    unconflictedNames: 
+      list.map(type => type.name)
   }
 }
 
-function generateReasonCode(node, typeInfo, args) {
+function generateReasonCode(node, typeInfo, argsTypeInfo) {
   return `
 ${commentOnTop()}
 
@@ -103,7 +115,7 @@ ${generateFullQueryCode(node)}
 
 ${generateTypeCode(typeInfo)}
 
-${generateVariablesEncoder(args)}
+${generateVariablesEncoder(argsTypeInfo)}
 
 [@bs.module "./AppQuery.codec"]external decodeQueryResult: Js.Json.t => queryResult = "decodeQueryResult";
 `.trim();
@@ -143,12 +155,13 @@ function wrapTypeName(typeInfo, field) {
   return field.option? `option(${typeName})` : typeName;
 }
 
-function generateVariablesEncoder(args) {
-  if(args.length > 0) {
+function generateVariablesEncoder(argsTypeInfo) {
+  if(argsTypeInfo.list.length > 0) {
+    let variableArgs = generateVariablesArgs(argsTypeInfo.map['variablesType'].fields);
     return `
-${generateTypeCode(args)}
+${generateTypeCode(argsTypeInfo)}
 
-let encodeVariables: variablesType => queryVars = (vars) => variablesType(${generateVaraiblesArgs(args[0].fields)});
+let encodeVariables: variablesType => queryVars = (vars) => queryVars(${variableArgs});
 `.trim();
   } else {
     return `
@@ -158,7 +171,7 @@ let encodeVariables: variablesType => Js.Json.t = vars => Js.Json.object_(vars);
   }
 }
 
-function generateVaraiblesArgs(fields) {
+function generateVariablesArgs(fields) {
   return fields.map(field => `~${field.name}=vars.${field.name}`).join(',')
 }
 
@@ -272,9 +285,9 @@ function isScalar(type) {
 exports.queryToReason = function(node, typeMap) {
   let queryRoot = node.ast.definitions[0];
   let typeInfo = generateTypeInfoFromQuery(queryRoot, typeMap);
-  let args = argumentTypes(queryRoot.variableDefinitions);
+  let argsTypeInfo = argumentTypes(queryRoot.variableDefinitions);
   return {
-    reason: generateReasonCode(node, typeInfo, args),
+    reason: generateReasonCode(node, typeInfo, argsTypeInfo),
     codec: generateCodec(typeInfo),
   }
 }

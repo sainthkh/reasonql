@@ -20,28 +20,28 @@ query types($j: Int!, $ss: String) {
 }
 |}
 
-type a_b_B = {
+type b = {
   id: string,
   iii: option(int),
 };
 
-type a_A = {
+type a = {
   id: string,
   ii: option(int),
-  b: a_b_B,
+  b: b,
   ff: float,
 };
 
-type c_C = {
+type c = {
   id: string,
   ss: option(string),
 };
 
-type queryResponse = {
+type queryResult = {
   i: int,
-  a: option(a_A),
+  a: option(a),
   s: option(string),
-  c: c_C,
+  c: c,
 };
 
 type variablesType = {
@@ -55,7 +55,6 @@ type queryVars = {
   ss: option(string),
 };
 
-let encodeVariables: variablesType => queryVars = (vars) => variablesType(~j=vars.j,~ss=vars.ss);
+let encodeVariables: variablesType => queryVars = (vars) => queryVars(~j=vars.j,~ss=vars.ss);
 
-type schemaQueryResponse = SchemaTypes.queryResponse;
-let decodeResponse = SchemaTypes.decodeQueryResponse;
+[@bs.module "./AppQuery.codec"]external decodeQueryResult: Js.Json.t => queryResult = "decodeQueryResult";
