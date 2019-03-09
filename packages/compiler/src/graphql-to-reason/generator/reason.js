@@ -9,6 +9,18 @@ const {
 } = require('./util')
 
 function generateReasonCode(node, typeInfo, argsTypeInfo) {
+  return node.isFragment
+    ? generateFragment(node, typeInfo, argsTypeInfo)
+    : generateQueryCode(node, typeInfo, argsTypeInfo)
+}
+
+function generateFragment(node, typeInfo, argsTypeInfo) {
+  return `
+${commentOnTop()}
+`.trim();
+}
+
+function generateQueryCode(node, typeInfo, argsTypeInfo) {
   return `
 ${commentOnTop()}
 
