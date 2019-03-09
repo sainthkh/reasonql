@@ -19,7 +19,7 @@ describe(`client query tests`, () => {
   fixtures.forEach(fixture => {
     // Code for partial test.
     // Commented out for later use. 
-    let tests = ['non-nullable-scalar', /*'nullable-scalar', 'array'*/];
+    let tests = ['non-nullable-scalar', 'nullable-scalar', /*'array'*/];
     if(!tests.includes(path.basename(fixture))) return;
     //*/
 
