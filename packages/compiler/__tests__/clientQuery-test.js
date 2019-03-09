@@ -20,9 +20,10 @@ describe(`client query tests`, () => {
     // Code for partial test.
     // Commented out for later use. 
     let tests = [
-      'non-nullable-scalar', 
-      'nullable-scalar', 
-      'array',
+      //'non-nullable-scalar', 
+      //'nullable-scalar', 
+      //'array',
+      'object',
     ];
     if(!tests.includes(path.basename(fixture))) return;
     //*/

@@ -23,7 +23,7 @@ var decodeC = function (res) {
   ]
 }
 
-var decodeQueryResponse = function (res) {
+var decodeQueryResult = function (res) {
   return [
     res.i,
     res.a ? decodeA(res.a) : undefined,
@@ -35,4 +35,4 @@ var decodeQueryResponse = function (res) {
 exports.decodeB = decodeB;
 exports.decodeA = decodeA;
 exports.decodeC = decodeC;
-exports.decodeQueryResponse = decodeQueryResponse;
+exports.decodeQueryResult = decodeQueryResult;
