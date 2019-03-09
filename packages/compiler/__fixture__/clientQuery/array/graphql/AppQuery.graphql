@@ -1,4 +1,4 @@
-query types {
+query AppQuery {
   i1
   i2
   i3
