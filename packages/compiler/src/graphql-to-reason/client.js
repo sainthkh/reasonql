@@ -9,6 +9,10 @@ const {
   decodeField,
 } = require('./decodeAST');
 
+const {
+  generateFullQueryCode,
+} = require('./fragment')
+
 function generateTypeListFromQuery(ast, typeMap) {
   let types = {};
   extractType(types, ast, [], typeMap, "Query");
@@ -71,7 +75,7 @@ function generateReasonCode(node, typeList, args) {
 ${commentOnTop()}
 
 let query = {|
-${node.code}
+${generateFullQueryCode(node)}
 |}
 
 ${generateTypeCode(typeList)}
