@@ -5,7 +5,9 @@ function commentOnTop() {
 function generateTypeCode(typeList) {
   return typeList.map(type => {
     let name = lowerTheFirstCharacter(type.name);
-    name = handleRootNames(name);
+    let specialNames = ["query", "mutation", "subscription"];
+    name = specialNames.includes(name) ? name + "Result" : name;
+    
     return (type.abstract ? `[@bs.deriving abstract]\n` : ``)
 + `type ${name} = {
 ${

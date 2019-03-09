@@ -82,8 +82,7 @@ ${generateTypeCode(typeList)}
 
 ${generateVariablesEncoder(args)}
 
-type schemaQueryResponse = SchemaTypes.queryResponse;
-let decodeResponse = SchemaTypes.decodeQueryResponse;
+[@bs.module "./AppQuery.codec"]external decodeQueryResult: Js.Json.t => queryResult = "decodeQueryResult";
 `.trim();
 }
 
@@ -106,9 +105,79 @@ function generateVaraiblesArgs(fields) {
   return fields.map(field => `~${field.name}=vars.${field.name}`).join(',')
 }
 
+// Added comment for sections because template string literals break 
+// the code indentation. And it makes code hard to read. 
+function generateCodec(typeList) {
+  let exportedNames = [];
+  let arrayTypes = new Set();
+
+  // Functions
+  let functions = typeList.map(type => {
+    let specialNames = ["Query", "Mutation", "Subscription"];
+    let name = specialNames.includes(type.name) ? "QueryResult" : type.name;
+
+    let functionName = `decode${name}`;
+    exportedNames.push(functionName);
+    
+    return `
+var ${functionName} = function (res) {
+  return [
+${type.fields.map(field => {
+  let varname = `res.${field.name}`;
+
+  if(isScalar(field.type)) {
+    return `    ${varname},`;
+  } else {
+    let decoderName = field.array
+      ? `decode${field.type}Array`
+      : `decode${field.type}`;
+    
+    if (field.array) {
+      arrayTypes.add(field.type);
+    }
+
+    return field.option
+      ? `    ${varname} ? ${decoderName}(${varname}) : undefined,`
+      : `    ${decoderName}(${varname}),`;
+  }
+}).join('\n')}
+  ]
+}`.trim();
+  }).join('\n\n');
+
+  // Array Decoders
+  let arrayDecoders = Array.from(arrayTypes).map(type => {
+    exportedNames.push(`decode${type}Array`);
+    return `
+var decode${type}Array = function (arr) {
+  return arr.map(item =>
+    item ? decode${type}(item) : undefined
+  )
+}
+`.trim()
+  }
+).join('\n\n')
+
+  // exports part.
+  let exported = exportedNames.map(name => 
+    `exports.${name} = ${name};`
+  ).join('\n').trim();
+
+  return `
+${commentOnTop()}
+
+${functions}
+${arrayDecoders ? `\n${arrayDecoders}\n` : ''}
+${exported}
+`.trim();
+}
+
 exports.queryToReason = function(node, typeMap) {
   let queryRoot = node.ast.definitions[0];
   let typeList = generateTypeListFromQuery(queryRoot, typeMap);
   let args = argumentTypes(queryRoot.variableDefinitions);
-  return generateReasonCode(node, typeList, args);
+  return {
+    reason: generateReasonCode(node, typeList, args),
+    codec: generateCodec(typeList),
+  }
 }
