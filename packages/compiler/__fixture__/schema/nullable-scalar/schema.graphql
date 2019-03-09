@@ -1,7 +1,0 @@
-type Query {
-  id: ID
-  name: String
-  married: Boolean
-  age: Int
-  closeRate: Float
-}
