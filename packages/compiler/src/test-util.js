@@ -7,6 +7,11 @@ const getDirectories = source =>
   .map(name => path.join(source, name))
   .filter(isDirectory)
 
+const getFiles = source => 
+  fs.readdirSync(source)
+  .map(name => path.join(source, name))
+  .filter(source => !isDirectory(source))
+
 let normalizeNewline = code =>
   code
     .replace(/\r\n/g, '\n') 
@@ -22,5 +27,6 @@ const compareTexts = (name, expected, received) => {
 
 module.exports = {
   getDirectories,
+  getFiles,
   compareTexts,
 }
