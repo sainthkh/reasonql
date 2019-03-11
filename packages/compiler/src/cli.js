@@ -1,11 +1,6 @@
-const {
-  loadConfig,
-  loadServerSchema,
-  generateSchemaTypes,
-  generateTypeFiles,
-} = require('./util')
+const argv = require('yargs').argv;
+const chokidar = require('chokidar');
 
-let conf = loadConfig();
-let ast = loadServerSchema(conf);
-generateSchemaTypes(ast);
-generateTypeFiles(conf, ast);
+const { compileAll } = require('./compiler');
+
+compileAll(process.cwd(), argv.w || argv.watch);

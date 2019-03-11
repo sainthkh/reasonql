@@ -9,6 +9,10 @@ const {
 } = require('../src/graphql-to-reason')
 
 const {
+  generateNodes,
+} = require('../src/compiler')
+
+const {
   getDirectories, 
   getFiles,
   compareTexts
@@ -23,7 +27,8 @@ describe(`client query tests`, () => {
       //'non-nullable-scalar', 
       //'nullable-scalar', 
       //'array',
-      'object',
+      //'object',
+      'fragment-simple',
     ];
     if(!tests.includes(path.basename(fixture))) return;
     //*/
@@ -35,14 +40,17 @@ describe(`client query tests`, () => {
     let files = getFiles(path.join(fixture, 'graphql'));
     files = files.filter(p => path.basename(p) != 'schema.graphql');
 
-    files.forEach(file => {
-      let {name} = path.parse(file);
-
-      let gqlCode = fs.readFileSync(file).toString();
-      let node = {
-        code: gqlCode,
-        ast: parse(gqlCode),
+    let gqlCodes = files.map(file => {
+      return {
+        template: fs.readFileSync(file).toString(),
       };
+    })
+
+    let nodes = generateNodes(gqlCodes);
+
+    nodes.forEach(node => {
+      let name = node.fileName;
+
       let result = queryToReason(node, typeMap);
       let reason = fs.readFileSync(path.join(fixture, `result/${name}.re`)).toString();
       let codec = fs.readFileSync(path.join(fixture, `result/${name}.codec.js`)).toString();

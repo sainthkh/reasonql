@@ -1,0 +1,10 @@
+type Query {
+  posts: [Post!]!
+}
+
+type Post {
+  title: String!
+  slug: String!
+  content: String!
+  summary: String
+}

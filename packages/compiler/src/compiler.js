@@ -1,10 +1,8 @@
 const glob = require('fast-glob');
-const argv = require('yargs').argv;
 const isUrl = require('is-url');
-const chokidar = require('chokidar');
 const {parse} = require('graphql');
+const {print} = require('graphql/language/printer');
 const {
-  schemaToReason,
   queryToReason,
   createTypeMap,
   findTags,
@@ -13,8 +11,15 @@ const {
 const fs = require('fs-extra');
 const path = require('path');
 
-function loadConfig() {
-  const configPath = path.join(process.cwd(), 'reasonql.config.js');
+function compileAll(dir, watch) {
+  let conf = loadConfig(dir, watch);
+  let ast = loadServerSchema(conf);
+  generateSchemaTypes(ast);
+  generateTypeFiles(conf, ast);
+}
+
+function loadConfig(dir, watch) {
+  const configPath = path.join(dir, 'reasonql.config.js');
   if(!fs.existsSync(configPath)) {
     console.log(`reasonql.config.js file doesn't exist.`)
     process.exit();
@@ -35,9 +40,7 @@ function loadConfig() {
     watch: false,
   }, conf);
 
-  if(argv.w || argv.watch) {
-    conf.watch = true;
-  }
+  conf.watch = !!watch;
 
   return conf;
 }
@@ -85,16 +88,6 @@ function loadServerSchema({ schema }) {
   return ast;
 }
 
-const DEST_DIR = './src/.reasonql';
-fs.ensureDirSync(DEST_DIR);
-
-function generateSchemaTypes(ast) {
-  let {reason, codec} = schemaToReason(ast);
-
-  fs.writeFileSync(path.join(DEST_DIR, 'SchemaTypes.re'), reason);
-  fs.writeFileSync(path.join(DEST_DIR, 'SchemaTypes.codec.js'), codec);
-}
-
 function generateTypeFiles({include, exclude, watch, src}, ast) {
   let typeMap = createTypeMap(ast);
 
@@ -113,27 +106,77 @@ function generateTypeFiles({include, exclude, watch, src}, ast) {
     gqlCodes = gqlCodes.concat(findTags(code));
   });
 
-  let nodes = gqlCodes.map(code => {
-    return {
-      code: code.template,
-      ast: parse(code.template),
-    }
-  });
-  
+  let nodes = generateNodes(gqlCodes);
+
   nodes.forEach(node => {
     generateTypeFile(node, typeMap);
   })
 }
 
+function generateNodes(gqlCodes) {
+  let nodes = gqlCodes.map(code => {
+    let ast = parse(code.template);
+    let isFragment = ast.definitions[0].kind == "FragmentDefinition";
+    let name = ast.definitions[0].name.value
+    let fileName = isFragment
+      ? name.split('_')[0]
+      : name;
+
+    return {
+      code: code.template,
+      ast,
+      isFragment,
+      fileName,
+    }
+  });
+
+  let fragments = nodes.filter(node => node.isFragment);
+  let fragmentMap = {};
+
+  fragments.forEach(fragment => {
+    fragment.ast.definitions.forEach(def => {
+      fragmentMap[def.name.value] = print({
+        kind: "Document",
+        definitions: [def],
+      });
+    });
+  });
+
+  for(var i = 0; i < nodes.length; i++) {
+    let node = nodes[i];
+
+    let re = /\.\.\.([A-Za-z0-9_]+)/g;
+    let spreads = new Set();
+
+    let m;
+    do {
+      m = re.exec(node.code);
+      if (m) {
+        spreads.add(m[1]);
+      }
+    } while(m);
+
+    let codes = [node.code];
+    
+    spreads.forEach(spread => {
+      codes.push(fragmentMap[spread]);
+    })
+
+    node.code = codes.join('\n');
+  }
+
+  return nodes;
+}
+
+const DEST_DIR = './src/.reasonql';
+  fs.ensureDirSync(DEST_DIR);
+
 function generateTypeFile(node, typeMap) {
   let code = queryToReason(node, typeMap);
-  fs.writeFileSync(path.join(DEST_DIR, `${node.ast.definitions[0].name.value}.re`), code);
+  fs.writeFileSync(path.join(DEST_DIR, `${node.fileName}.re`), code);
 }
 
 module.exports = {
-  loadConfig,
-  loadServerSchema,
-  generateSchemaTypes,
-  generateTypeFiles,
-  generateTypeFile,
+  compileAll,
+  generateNodes,
 }

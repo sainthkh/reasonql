@@ -1,4 +1,4 @@
-query types($j: Int!, $ss: String) {
+query AppQuery($j: Int!, $ss: String) {
   i
   a(j:$j) {
     id

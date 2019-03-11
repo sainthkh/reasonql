@@ -13,12 +13,16 @@ function getValidTypeName(typeInfo, typeName) {
     };
 
     return typeNames[typeName];
+  } else if(isFragmentTypeName(typeName)) {
+    return typeName;
   } else {
-    let selectionName = typeInfo.map[typeName].selectionName;
+    let {selectionName, userDefinedTypeName} = typeInfo.map[typeName];
     let name = 
-      typeInfo.unconflictedNames.includes(selectionName)
-      ? selectionName
-      : typeName
+      userDefinedTypeName 
+        ? userDefinedTypeName
+        : typeInfo.unconflictedNames.includes(selectionName)
+          ? selectionName
+          : typeName
 
     let rootNames = ["Query", "Mutation", "Subscription"];
     name = rootNames.includes(name) ? name + "Result" : name;
@@ -40,10 +44,15 @@ function isScalar(type) {
   return scalarTypes.includes(type);
 }
 
+function isFragmentTypeName(type) {
+  return type.includes(".");
+}
+
 module.exports = {
   commentOnTop,
   getValidTypeName,
   lowerTheFirstCharacter,
   upperTheFirstCharacter,
   isScalar,
+  isFragmentTypeName,
 }

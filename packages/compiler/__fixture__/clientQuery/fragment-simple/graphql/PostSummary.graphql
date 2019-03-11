@@ -1,0 +1,5 @@
+fragment PostSummary_post on Post {
+  title
+  slug
+  summary
+}

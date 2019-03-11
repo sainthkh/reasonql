@@ -1,9 +1,4 @@
 const {
-  generateFullQueryCode,
-} = require('../fragment')
-
-const {
-  lowerTheFirstCharacter,
   getValidTypeName,
   commentOnTop,
 } = require('./util')
@@ -17,6 +12,8 @@ function generateReasonCode(node, typeInfo, argsTypeInfo) {
 function generateFragment(node, typeInfo, argsTypeInfo) {
   return `
 ${commentOnTop()}
+
+${generateTypeCode(typeInfo)}
 `.trim();
 }
 
@@ -25,7 +22,7 @@ function generateQueryCode(node, typeInfo, argsTypeInfo) {
 ${commentOnTop()}
 
 let query = {|
-${generateFullQueryCode(node)}
+${cleanCode(node.code)}
 |}
 
 ${generateTypeCode(typeInfo)}
@@ -36,12 +33,23 @@ ${generateVariablesEncoder(argsTypeInfo)}
 `.trim();
 }
 
+function cleanCode(code) {
+  let result = code;
+  let directives = [
+    'singular',
+    'reasontype',
+  ]
+  let re = new RegExp(`@(${directives.join('|')})\\(.+\\)`, 'g');
+  result = result.replace(re, '');
+  return result.trim();
+}
+
 function generateTypeCode(typeInfo) {
   return typeInfo.list.map(type => {
     let name = getValidTypeName(typeInfo, type.name);
     
     return (type.abstract ? `[@bs.deriving abstract]\n` : ``)
-+ `type ${lowerTheFirstCharacter(name)} = {
++ `type ${name} = {
 ${
   type.fields.map(field => {
     return `  ${field.name}: ${wrapTypeName(typeInfo, field)},`

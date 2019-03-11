@@ -8,11 +8,14 @@ const {
   isScalar,
 } = require('./generator')
 
-function makeTypeInfo(ast, typeMap) {
+function makeTypeInfo(ast, isFragment, typeMap) {
   let types = {};
-  extractType(types, ast, [], typeMap, "Query");
+  let rootType = isFragment 
+    ? ast.typeCondition.name.value
+    : "Query"
+  extractType(types, ast, [], typeMap, rootType);
 
-  let typeList = childTypes(types, types["Query"]);
+  let typeList = childTypes(types, types[rootType]);
   let typeInfo = {
     list: typeList,
     map: types,
@@ -28,22 +31,43 @@ function makeTypeInfo(ast, typeMap) {
   return typeInfo;
 }
 
-function extractType(types, ast, selectionNames, typeMap, currentType) {
+function extractType(types, ast, selectionNames, typeMap, currentType, userDefinedTypeName) {
   let fields = ast.selectionSet.selections.map(selection => {
-    let name = selection.name.value;
-    let typeObj = typeMap[currentType].fields[selection.name.value];
-    let typeName = typeObj.type;
-    
-    if(selection.selectionSet) {
-      extractType(types, selection, [...selectionNames, name], typeMap, typeName);
-    }
+    if(selection.kind == "FragmentSpread") {
+      let fragment = selection.name.value;
+      let [component, typeName] = fragment.split('_');
 
-    return {
-      ...typeObj,
-      name,
-      type: isScalar(typeName)
-        ? typeName
-        : [...selectionNames, name, typeName].join('_'),
+      return {
+        name: `f_${typeName}`,
+        type: `${component}.${typeName}`,
+      }
+    } else {
+      let name = selection.name.value;
+      let typeObj = typeMap[currentType].fields[selection.name.value];
+      let typeName = typeObj.type;
+      
+      let userDefinedType = undefined;
+      if (selection.directives.length > 0) {
+        selection.directives.forEach(d => {
+          let name = d.name.value;
+          if(name == "singular" || name == "reasontype") {
+            userDefinedType = d.arguments[0].value.value;
+          }
+        })
+      }
+
+      if(selection.selectionSet) {
+        extractType(types, selection, [...selectionNames, name], typeMap, typeName, userDefinedType);
+      }
+
+      return {
+        ...typeObj,
+        name,
+        type: isScalar(typeName)
+          ? typeName
+          : [...selectionNames, name, typeName].join('_'),
+        userDefinedType: userDefinedTypeName,
+      }
     }
   })
   
@@ -54,10 +78,16 @@ function extractType(types, ast, selectionNames, typeMap, currentType) {
       ? selectionNames[selectionNames.length - 1]
       : currentType,
     fields,
+    userDefinedTypeName,
   }
 }
 
 function childTypes(types, type) {
+  // When fragment, type can be undefined. 
+  if(!type) {
+    return [];
+  }
+
   let typeList = []
   type.fields.reverse().forEach(field => {
     if(!isScalar(field.type)){
@@ -73,6 +103,15 @@ function childTypes(types, type) {
 }
 
 function argumentTypes(args) {
+  // When args is from Fragments, it's undefined. 
+  if(!args) {
+    return {
+      list: [],
+      map: {},
+      unconflictedNames: [],
+    }
+  }
+
   let fields = args.map(arg => {
     return decodeField(arg);
   })
@@ -109,7 +148,7 @@ function argumentTypes(args) {
 
 exports.queryToReason = function(node, typeMap) {
   let queryRoot = node.ast.definitions[0];
-  let typeInfo = makeTypeInfo(queryRoot, typeMap);
+  let typeInfo = makeTypeInfo(queryRoot, node.isFragment, typeMap);
   let argsTypeInfo = argumentTypes(queryRoot.variableDefinitions);
   return {
     reason: generateReasonCode(node, typeInfo, argsTypeInfo),

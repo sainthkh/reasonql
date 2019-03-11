@@ -1,0 +1,5 @@
+query AppQuery {
+  posts @singular(name:"post") {
+    ...PostSummary_post
+  }
+}
