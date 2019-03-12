@@ -105,7 +105,7 @@ function generateTypeFiles({include, exclude, watch, src}, schemaAst) {
     gqlCodes = gqlCodes.concat(findTags(code));
   });
 
-  let nodes = generateNodes(gqlCodes);
+  let nodes = generateNodes(gqlCodes, typeMap);
 
   nodes.forEach(node => {
     generateTypeFile(node, typeMap);
