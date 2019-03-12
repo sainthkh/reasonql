@@ -4,17 +4,17 @@ type queryStatus =
 
 type state = {
   status: queryStatus,
-  data: option(AppQuery.schemaQueryResponse),
+  data: option(AppQuery.queryResult),
 }
 
 type action = 
-  | Fetched(AppQuery.schemaQueryResponse)
+  | Fetched(AppQuery.queryResult)
 
 let component = ReasonReact.reducerComponent("App");
 
 let query = ReasonQL.gql({|
   query AppQuery {
-    posts {
+    posts @singular(name: "post") {
       ...PostFragment_post
     }
   }
@@ -56,8 +56,8 @@ let make = (_children) => {
           
           switch(data.posts->Array.length) {
           | 0 => { ReasonReact.string("no posts here.") }
-          | _ => data.posts |> Array.map((post:SchemaTypes.post) => {
-            <Post key=post.slug response={ post: post } />
+          | _ => data.posts |> Array.mapi((i, post:AppQuery.post) => {
+            <Post key=string_of_int(i) post=post.f_post />
           }) |> ReasonReact.array
           }
         }

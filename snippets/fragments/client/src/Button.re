@@ -7,12 +7,12 @@ let query = ReasonQL.gql({|
 let component = ReasonReact.statelessComponent("Button")
 
 let make = (
-  ~response: ButtonFragment.response,
+  ~post: ButtonFragment.post,
   _children
 ) => {
   ...component,
 
   render: _self => {
-    <a href={j|/$response.post.slug|j}>{ ReasonReact.string("Read More") }</a>
+    <a href={j|/$post.slug|j}>{ ReasonReact.string("Read More") }</a>
   }
 }
