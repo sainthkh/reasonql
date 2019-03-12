@@ -14,8 +14,6 @@
   "suffix": ".bs.js",
   "namespace": false,
   "bs-dependencies": [
-    "@aantron/repromise",
-    "reason-future"
   ],
   "refmt": 3
 }

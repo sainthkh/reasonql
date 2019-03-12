@@ -20,12 +20,13 @@ module MakeRequest = (Q: Query, C: Client) => {
   });
 
   type response = Js.t({.
-    [@bs.meth] json: unit => Repromise.t(apolloResultJs),
+    [@bs.meth] json: unit => Js.Promise.t(apolloResultJs),
   });
 
-  [@bs.val]external fetch: (string, Js.Json.t) => Repromise.t(response) = "";
+  [@bs.val]external fetch: (string, Js.Json.t) => Js.Promise.t(response) = "";
 
-  let send: Q.variablesType => Repromise.t(apolloResultJs) = vars => {
+  let send: Q.variablesType => Js.Promise.t(apolloResultJs) = vars => {
+    open Js.Promise;
     fetch(C.url, Obj.magic({
       "method": "POST",
       "headers": {
@@ -36,17 +37,19 @@ module MakeRequest = (Q: Query, C: Client) => {
         "variables": Q.encodeVariables(vars),
       }))
     }))
-    |> Repromise.andThen((response:response) => {
+    |> then_((response:response) => {
       response##json();
     })
   }
 
-  let finished: (Repromise.t(apolloResultJs), Q.queryResult => unit) => unit
+  let finished: (Js.Promise.t(apolloResultJs), Q.queryResult => unit) => unit
   = (promise, f) => {
+    open Js.Promise;
+
     promise 
-    |> Repromise.map(json => {
+    |> then_(json => {
       let data = Q.decodeQueryResult(json##data);
-      f(data)
+      resolve(f(data))
     })
     |> ignore;
   };
