@@ -32,32 +32,42 @@ function generateNodes(gqlCodes, typeMap) {
   for(var i = 0; i < nodes.length; i++) {
     let node = nodes[i];
 
-    let re = /\.\.\.([A-Za-z0-9_]+)/g;
-    let fragmentComponents = new Set();
+    if(!node.isFragment) {
+      let fragmentComponents = new Set();
 
-    let m;
-    do {
-      m = re.exec(node.code);
-      if (m) {
-        let name = fragmentFileName(m[1]);
-        fragmentComponents.add(name);
-      }
-    } while(m);
-    
-    let codes = [node.code];
-    let codecs = [node.codec];
+      findFragments(nodeMap, node.fileName, fragmentComponents);
 
-    fragmentComponents.forEach(spread => {
-      let {code, codec} = nodeMap[fragmentFileName(spread)]
-      codes.push(code);
-      codecs.push(codec);
-    });
+      let codes = [node.code];
+      let codecs = [node.codec];
 
-    node.code = codes.join('\n');
-    node.codec = codecs.join('\n\n');
+      fragmentComponents.forEach(spread => {
+        let {code, codec} = nodeMap[fragmentFileName(spread)]
+        codes.push(code);
+        codecs.push(codec);
+      });
+
+      node.code = codes.join('\n');
+      node.codec = codecs.join('\n\n');
+    }
   }
 
   return nodes;
+}
+
+function findFragments(nodeMap, currentFileName, resultSet) {
+  let node = nodeMap[currentFileName];
+
+  let re = /\.\.\.([A-Za-z0-9_]+)/g;
+
+  let m;
+  do {
+    m = re.exec(node.code);
+    if (m) {
+      let name = fragmentFileName(m[1]);
+      resultSet.add(name);
+      findFragments(nodeMap, name, resultSet);
+    }
+  } while(m);
 }
 
 function fragmentFileName(fragmentName) {
