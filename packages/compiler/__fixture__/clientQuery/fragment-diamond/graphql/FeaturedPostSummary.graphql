@@ -1,0 +1,7 @@
+fragment FeaturedPostSummary_post on Post {
+  title
+  slug
+  summary
+  content
+  ...CommentSummary_post
+}

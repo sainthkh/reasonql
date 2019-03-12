@@ -1,0 +1,10 @@
+query AppQuery {
+  featuredPosts @singular(name: "featuredPost") {
+    slug
+    ...FeaturedPostSummary_post
+  }
+  posts @singular(name:"post") {
+    slug
+    ...PostSummary_post
+  }
+}

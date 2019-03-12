@@ -26,6 +26,7 @@ describe(`client query tests`, () => {
       //'array',
       //'object',
       'fragment-simple',
+      'fragment-diamond',
     ];
     if(!tests.includes(path.basename(fixture))) return;
     //*/

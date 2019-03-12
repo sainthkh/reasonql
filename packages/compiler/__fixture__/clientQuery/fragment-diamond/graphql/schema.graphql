@@ -1,0 +1,12 @@
+type Query {
+  featuredPosts: [Post!]
+  posts: [Post!]!
+}
+
+type Post {
+  title: String!
+  slug: String!
+  content: String!
+  summary: String
+  commentCount: Int!
+}

@@ -1,0 +1,3 @@
+fragment CommentSummary_post on Post {
+  commentCount
+}
