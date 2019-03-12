@@ -55,4 +55,70 @@ type queryResult = {
 type variablesType = Js.Dict.t(Js.Json.t);
 let encodeVariables: variablesType => Js.Json.t = vars => Js.Json.object_(vars);
 
-[@bs.module "./AppQuery.codec"]external decodeQueryResult: Js.Json.t => queryResult = "decodeQueryResult";
+[%%raw {|
+var decodeP1 = function (res) {
+  return [
+    res.id,
+    res.name,
+  ]
+}
+
+var decodeP2 = function (res) {
+  return [
+    res.name,
+  ]
+}
+
+var decodeP3 = function (res) {
+  return [
+    res.id,
+  ]
+}
+
+var decodeP4 = function (res) {
+  return [
+    res.id,
+    res.name,
+  ]
+}
+
+var decodeQueryResult = function (res) {
+  return [
+    res.i1,
+    res.i2,
+    res.i3,
+    res.i4,
+    res.p1 ? decodeP1Array(res.p1) : undefined,
+    decodeP2Array(res.p2),
+    res.p3 ? decodeP3Array(res.p3) : undefined,
+    decodeP4Array(res.p4),
+  ]
+}
+
+var decodeP1Array = function (arr) {
+  return arr.map(item =>
+    item ? decodeP1(item) : undefined
+  )
+}
+
+var decodeP2Array = function (arr) {
+  return arr.map(item =>
+    item ? decodeP2(item) : undefined
+  )
+}
+
+var decodeP3Array = function (arr) {
+  return arr.map(item =>
+    item ? decodeP3(item) : undefined
+  )
+}
+
+var decodeP4Array = function (arr) {
+  return arr.map(item =>
+    item ? decodeP4(item) : undefined
+  )
+}
+|}]
+
+[@bs.val]external decodeQueryResultJs: Js.Json.t => queryResult = "decodeQueryResult";
+let decodeQueryResult = decodeQueryResultJs;

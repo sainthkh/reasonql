@@ -1,11 +1,11 @@
 const glob = require('fast-glob');
 const isUrl = require('is-url');
 const {parse} = require('graphql');
-const {print} = require('graphql/language/printer');
 const {
-  queryToReason,
+  generateReasonCode,
   createTypeMap,
   findTags,
+  generateNodes,
 } = require('./graphql-to-reason');
 
 const fs = require('fs-extra');
@@ -14,7 +14,6 @@ const path = require('path');
 function compileAll(dir, watch) {
   let conf = loadConfig(dir, watch);
   let ast = loadServerSchema(conf);
-  generateSchemaTypes(ast);
   generateTypeFiles(conf, ast);
 }
 
@@ -88,8 +87,8 @@ function loadServerSchema({ schema }) {
   return ast;
 }
 
-function generateTypeFiles({include, exclude, watch, src}, ast) {
-  let typeMap = createTypeMap(ast);
+function generateTypeFiles({include, exclude, watch, src}, schemaAst) {
+  let typeMap = createTypeMap(schemaAst);
 
   include = Array.isArray(include) ? include : [include];
   const patterns = include.map(inc => `${inc}/*.re`);
@@ -113,70 +112,14 @@ function generateTypeFiles({include, exclude, watch, src}, ast) {
   })
 }
 
-function generateNodes(gqlCodes) {
-  let nodes = gqlCodes.map(code => {
-    let ast = parse(code.template);
-    let isFragment = ast.definitions[0].kind == "FragmentDefinition";
-    let name = ast.definitions[0].name.value
-    let fileName = isFragment
-      ? name.split('_')[0]
-      : name;
-
-    return {
-      code: code.template,
-      ast,
-      isFragment,
-      fileName,
-    }
-  });
-
-  let fragments = nodes.filter(node => node.isFragment);
-  let fragmentMap = {};
-
-  fragments.forEach(fragment => {
-    fragment.ast.definitions.forEach(def => {
-      fragmentMap[def.name.value] = print({
-        kind: "Document",
-        definitions: [def],
-      });
-    });
-  });
-
-  for(var i = 0; i < nodes.length; i++) {
-    let node = nodes[i];
-
-    let re = /\.\.\.([A-Za-z0-9_]+)/g;
-    let spreads = new Set();
-
-    let m;
-    do {
-      m = re.exec(node.code);
-      if (m) {
-        spreads.add(m[1]);
-      }
-    } while(m);
-
-    let codes = [node.code];
-    
-    spreads.forEach(spread => {
-      codes.push(fragmentMap[spread]);
-    })
-
-    node.code = codes.join('\n');
-  }
-
-  return nodes;
-}
-
 const DEST_DIR = './src/.reasonql';
   fs.ensureDirSync(DEST_DIR);
 
 function generateTypeFile(node, typeMap) {
-  let code = queryToReason(node, typeMap);
+  let code = generateReasonCode(node, typeMap);
   fs.writeFileSync(path.join(DEST_DIR, `${node.fileName}.re`), code);
 }
 
 module.exports = {
   compileAll,
-  generateNodes,
 }

@@ -24,4 +24,33 @@ type queryResult = {
 type variablesType = Js.Dict.t(Js.Json.t);
 let encodeVariables: variablesType => Js.Json.t = vars => Js.Json.object_(vars);
 
-[@bs.module "./AppQuery.codec"]external decodeQueryResult: Js.Json.t => queryResult = "decodeQueryResult";
+[%%raw {|
+var decodePost = function (res) {
+  return [
+    PostSummary_decodePost(res),
+  ]
+}
+
+var decodeQueryResult = function (res) {
+  return [
+    decodePostArray(res.posts),
+  ]
+}
+
+var decodePostArray = function (arr) {
+  return arr.map(item =>
+    item ? decodePost(item) : undefined
+  )
+}
+
+var PostSummary_decodePost = function (res) {
+  return [
+    res.title,
+    res.slug,
+    res.summary,
+  ]
+}
+|}]
+
+[@bs.val]external decodeQueryResultJs: Js.Json.t => queryResult = "decodeQueryResult";
+let decodeQueryResult = decodeQueryResultJs;

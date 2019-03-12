@@ -10,8 +10,8 @@ module type Query = {
   type variablesType;
   let encodeVariables: variablesType => Js.Json.t;
   
-  type schemaQueryResponse;
-  let decodeResponse: Js.Json.t => schemaQueryResponse;
+  type queryResult
+  let decodeQueryResult: Js.Json.t => queryResult;
 };
 
 module MakeRequest = (Q: Query, C: Client) => {
@@ -41,11 +41,11 @@ module MakeRequest = (Q: Query, C: Client) => {
     })
   }
 
-  let finished: (Repromise.t(apolloResultJs), Q.schemaQueryResponse => unit) => unit
+  let finished: (Repromise.t(apolloResultJs), Q.queryResult => unit) => unit
   = (promise, f) => {
     promise 
     |> Repromise.map(json => {
-      let data = Q.decodeResponse(json##data);
+      let data = Q.decodeQueryResult(json##data);
       f(data)
     })
     |> ignore;

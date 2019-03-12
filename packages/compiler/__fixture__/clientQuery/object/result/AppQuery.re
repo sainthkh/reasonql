@@ -57,4 +57,39 @@ type queryVars = {
 
 let encodeVariables: variablesType => queryVars = (vars) => queryVars(~j=vars.j,~ss=vars.ss);
 
-[@bs.module "./AppQuery.codec"]external decodeQueryResult: Js.Json.t => queryResult = "decodeQueryResult";
+[%%raw {|
+var decodeB = function (res) {
+  return [
+    res.id,
+    res.iii,
+  ]
+}
+
+var decodeA = function (res) {
+  return [
+    res.id,
+    res.ii,
+    decodeB(res.b),
+    res.ff,
+  ]
+}
+
+var decodeC = function (res) {
+  return [
+    res.id,
+    res.ss,
+  ]
+}
+
+var decodeQueryResult = function (res) {
+  return [
+    res.i,
+    res.a ? decodeA(res.a) : undefined,
+    res.s,
+    decodeC(res.c),
+  ]
+}
+|}]
+
+[@bs.val]external decodeQueryResultJs: Js.Json.t => queryResult = "decodeQueryResult";
+let decodeQueryResult = decodeQueryResultJs;

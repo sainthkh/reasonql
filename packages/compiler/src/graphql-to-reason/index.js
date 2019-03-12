@@ -1,9 +1,11 @@
-const {queryToReason} = require('./client');
-const {createTypeMap} = require('./typemap');
+const {createTypeMap} = require('./type');
+const {generateNodes} = require('./node');
+const {generateReasonCode} = require('./reason');
 const {findTags} = require('./tagFinder');
 
 module.exports = {
-  queryToReason,
+  generateReasonCode,
   createTypeMap,
+  generateNodes,
   findTags,
 }

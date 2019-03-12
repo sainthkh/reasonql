@@ -21,4 +21,17 @@ type queryResult = {
 type variablesType = Js.Dict.t(Js.Json.t);
 let encodeVariables: variablesType => Js.Json.t = vars => Js.Json.object_(vars);
 
-[@bs.module "./AppQuery.codec"]external decodeQueryResult: Js.Json.t => queryResult = "decodeQueryResult";
+[%%raw {|
+var decodeQueryResult = function (res) {
+  return [
+    res.id,
+    res.name,
+    res.married,
+    res.age,
+    res.closeRate,
+  ]
+}
+|}]
+
+[@bs.val]external decodeQueryResultJs: Js.Json.t => queryResult = "decodeQueryResult";
+let decodeQueryResult = decodeQueryResultJs;

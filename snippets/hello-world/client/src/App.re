@@ -5,11 +5,11 @@ type queryStatus =
 
 type state = {
   status: queryStatus,
-  data: option(AppQuery.schemaQueryResponse),
+  data: option(AppQuery.queryResult),
 }
 
 type action = 
-  | Fetched(AppQuery.schemaQueryResponse)
+  | Fetched(AppQuery.queryResult)
 
 let component = ReasonReact.reducerComponent("App");
 
