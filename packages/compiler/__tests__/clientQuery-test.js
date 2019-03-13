@@ -27,7 +27,8 @@ describe(`client query tests`, () => {
       //'object',
       //'fragment-simple',
       //'fragment-diamond',
-      'fragment-multiple-in-one',
+      //'fragment-multiple-in-one',
+      'name-conflict',
     ];
     if(!tests.includes(path.basename(fixture))) return;
     //*/

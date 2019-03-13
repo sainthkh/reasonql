@@ -1,0 +1,18 @@
+type Query {
+  hero: Person!
+  villain: Person!
+}
+
+type Person {
+  name: Name!
+  ship: Ship
+}
+
+type Name {
+  first: String!
+  last: String
+}
+
+type Ship {
+  name: String!
+}

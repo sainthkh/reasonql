@@ -1,0 +1,19 @@
+query AppQuery {
+  hero {
+    name {
+      first
+      last
+    }
+    ship {
+      name
+    }
+  }
+  villain {
+    name {
+      first
+    }
+    ship @reasontype(name:"villainShip") {
+      name
+    }
+  }
+}
