@@ -25,8 +25,9 @@ describe(`client query tests`, () => {
       //'nullable-scalar', 
       //'array',
       //'object',
-      'fragment-simple',
-      'fragment-diamond',
+      //'fragment-simple',
+      //'fragment-diamond',
+      'fragment-multiple-in-one',
     ];
     if(!tests.includes(path.basename(fixture))) return;
     //*/

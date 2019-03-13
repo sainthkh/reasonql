@@ -1,0 +1,11 @@
+fragment TodoData_todo on Todo {
+  id
+  complete
+  text
+}
+
+fragment TodoData_viewer on User {
+  id
+  totalCount
+  completedCount
+}

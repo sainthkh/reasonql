@@ -54,7 +54,9 @@ function extractType(types, ast, selectionNames, typeMap, currentType, userDefin
   
   let name = [...selectionNames, currentType].join('_');
   types[name] = {
-    name,
+    name: ast.kind == "FragmentDefinition" // isFragment type
+      ? ast.name.value.replace('_', '#')
+      : name,
     selectionName: selectionNames.length > 0 
       ? selectionNames[selectionNames.length - 1]
       : currentType,
@@ -156,6 +158,8 @@ function getValidTypeName(types, unconflictedNames, typeName) {
     return typeNames[typeName];
   } else if(isFragmentTypeName(typeName)) {
     return typeName;
+  } else if(typeName.includes('#')) { // For fragment type definition.
+    return typeName.split('#')[1];
   } else {
     let {selectionName, userDefinedTypeName} = types[typeName];
     let name = 
@@ -165,8 +169,7 @@ function getValidTypeName(types, unconflictedNames, typeName) {
           ? selectionName
           : typeName
 
-    let rootNames = ["Query", "Mutation", "Subscription"];
-    name = rootNames.includes(name) ? name + "Result" : name;
+    name = isRootName(name) ? name + "Result" : name;
 
     return lowerTheFirstCharacter(name);
   }
@@ -175,6 +178,11 @@ function getValidTypeName(types, unconflictedNames, typeName) {
 function isScalar(type) {
   let scalarTypes = ["ID", "String", "Int", "Float", "Boolean"];
   return scalarTypes.includes(type);
+}
+
+function isRootName(type) {
+  let names = ["Query", "Mutation", "Subscription"];
+  return names.includes(type);
 }
 
 function isFragmentTypeName(type) {

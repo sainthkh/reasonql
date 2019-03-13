@@ -1,0 +1,13 @@
+query AppQuery {
+  viewer {
+    todos @singular(name:"todo") {
+      id
+      complete
+      ...TodoData_todo
+    }
+    id
+    totalCount
+    completedCount
+    ...TodoData_viewer
+  }
+}

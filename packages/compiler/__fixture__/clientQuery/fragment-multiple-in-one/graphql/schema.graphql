@@ -1,0 +1,17 @@
+type Query {
+  viewer: User
+}
+
+type Todo {
+  id: ID!
+  text: String!
+  complete: Boolean!
+}
+
+type User {
+  """The ID of an object"""
+  id: ID!
+  todos: [Todo!]!
+  totalCount: Int!
+  completedCount: Int!
+}

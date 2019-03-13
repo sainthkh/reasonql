@@ -6,12 +6,18 @@ function generateNodes(gqlCodes, typeMap) {
   let nodes = gqlCodes.map(code => {
     let ast = parse(code.template);
     let queryRoot = ast.definitions[0];
+
+    let name = queryRoot.name.value;
     let isFragment = queryRoot.kind == "FragmentDefinition";
-    let name = ast.definitions[0].name.value
+    
     let fileName = isFragment
       ? fragmentFileName(name)
       : name;
-    let typeList = makeTypeList(queryRoot, isFragment, typeMap);
+    let typeList = isFragment
+      ? ast.definitions
+        .map(def => makeTypeList(def, isFragment, typeMap))
+        .reduce((prev, current) => [...prev, ...current], [])
+      : makeTypeList(queryRoot, isFragment, typeMap);
 
     return {
       code: code.template.trim(),
