@@ -1,6 +1,6 @@
 query AppQuery {
   hero {
-    name {
+    name @reasontype(name:"heroName") {
       first
       last
     }

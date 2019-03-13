@@ -17,9 +17,10 @@ function generateQueryCode(node, typeList, args) {
   return `
 ${commentOnTop()}
 
-let query = {|
-${cleanCode(node.code)}
-|}
+/* Original Query
+${node.code}
+*/
+let query = {|${cleanCode(node.code)}|}
 
 ${generateTypeCode(typeList)}
 
@@ -40,13 +41,45 @@ function commentOnTop() {
 
 function cleanCode(code) {
   let result = code;
+  
+  // 1. Remove directives
   let directives = [
     'singular',
     'reasontype',
   ]
   let re = new RegExp(`@(${directives.join('|')})\\(.+\\)`, 'g');
   result = result.replace(re, '');
-  return result.trim();
+
+  // 2. Normalize newline
+  result = result.replace(/\r\n?/g, '\n');
+
+  // 3. Trim lines
+  let lines = result.split('\n');
+  result = 
+    lines.map(line => line.trim())
+    .filter(line => line.length > 0)
+    .join('\n');
+  
+  // 4. Remove unnecessary spaces around delimiters({}:,)
+  result = result.replace(/\s*({|}|:|,)\s*/g, '$1');
+  
+  // 5. Shorten fragment names into F0, F1, F2, and so on. 
+  let fre = /\.\.\.([A-Za-z0-9_]+)/g;
+
+  let fragments = []
+  let m;
+  do {
+    m = fre.exec(result);
+    if (m) {
+      fragments.push(m[1]);
+    }
+  }while(m);
+
+  result = fragments.reduce((result, fragment, i) => {
+    return result.replace(new RegExp(`${fragment}`, 'g'), `F${i}`)
+  }, result);
+  
+  return result;
 }
 
 function generateTypeCode(typeList) {
