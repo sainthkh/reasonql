@@ -81,13 +81,13 @@ var decodeQueryResult = function (res) {
 
 var decodeFeaturedPostArray = function (arr) {
   return arr.map(item =>
-    item ? decodeFeaturedPost(item) : undefined
+    decodeFeaturedPost(item)
   )
 }
 
 var decodePostArray = function (arr) {
   return arr.map(item =>
-    item ? decodePost(item) : undefined
+    decodePost(item)
   )
 }
 

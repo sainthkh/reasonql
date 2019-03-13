@@ -32,7 +32,10 @@ ${type.fields.map(field => {
       : `decode${validType}`;
     
     if (field.array) {
-      arrayTypes.add(validType);
+      arrayTypes.add({
+        typeName: validType,
+        contentOption: field.contentOption,
+      });
     }
 
     return field.option
@@ -50,9 +53,13 @@ ${type.fields.map(field => {
 function generateArrayDecoders(arrayTypes) {
   let arrayDecoders = Array.from(arrayTypes).map(type => {
     return `
-var decode${type}Array = function (arr) {
+var decode${type.typeName}Array = function (arr) {
   return arr.map(item =>
-    item ? decode${type}(item) : undefined
+    ${
+      type.contentOption 
+      ? `item ? decode${type.typeName}(item) : undefined`
+      : `decode${type.typeName}(item)`
+    }
   )
 }
 `.trim()

@@ -85,7 +85,7 @@ var decodeQueryResult = function (res) {
 
 var decodeTodoArray = function (arr) {
   return arr.map(item =>
-    item ? decodeTodo(item) : undefined
+    decodeTodo(item)
   )
 }
 

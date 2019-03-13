@@ -116,13 +116,13 @@ var decodeP2Array = function (arr) {
 
 var decodeP3Array = function (arr) {
   return arr.map(item =>
-    item ? decodeP3(item) : undefined
+    decodeP3(item)
   )
 }
 
 var decodeP4Array = function (arr) {
   return arr.map(item =>
-    item ? decodeP4(item) : undefined
+    decodeP4(item)
   )
 }
 |}]

@@ -42,7 +42,7 @@ var decodeQueryResult = function (res) {
 
 var decodePostArray = function (arr) {
   return arr.map(item =>
-    item ? decodePost(item) : undefined
+    decodePost(item)
   )
 }
 
