@@ -3,7 +3,7 @@ const path = require('path');
 const argv = require('yargs').argv;
 const chokidar = require('chokidar');
 
-const { compileAll, loadConfig } = require('./compiler');
+const { compileAll, loadConfig, currentTime } = require('./compiler');
 const { findTags } = require('./tagFinder');
 
 let cwd = process.cwd();
@@ -48,7 +48,8 @@ if(watch) {
       compileAll(conf);
       gqlTags[path] = tags;
     } else {
-      console.log(`GraphQL code isn't changed.`);
+      console.log('');
+      console.log(`[${currentTime()}] GraphQL code isn't changed.`);
     }
   })
   .on('unlink', path => {
