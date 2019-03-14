@@ -1,23 +1,17 @@
+const fs = require('fs-extra');
+const path = require('path');
 const glob = require('fast-glob');
 const isUrl = require('is-url');
 const {parse} = require('graphql');
+
+const { findTags } = require('./tagFinder');
 const {
   generateReasonCode,
   createTypeMap,
-  findTags,
   generateNodes,
 } = require('./graphql-to-reason');
 
-const fs = require('fs-extra');
-const path = require('path');
-
-function compileAll(dir, watch) {
-  let conf = loadConfig(dir, watch);
-  let ast = loadServerSchema(conf);
-  generateTypeFiles(conf, ast);
-}
-
-function loadConfig(dir, watch) {
+function loadConfig(dir) {
   const configPath = path.join(dir, 'reasonql.config.js');
   if(!fs.existsSync(configPath)) {
     console.log(`reasonql.config.js file doesn't exist.`)
@@ -39,9 +33,33 @@ function loadConfig(dir, watch) {
     watch: false,
   }, conf);
 
-  conf.watch = !!watch;
-
   return conf;
+}
+
+function compileAll(conf) {
+  console.log('');
+  console.log(`[${currentTime()}] compile started`);
+  let ast = loadServerSchema(conf);
+  generateTypeFiles(conf, ast);
+  console.log('compile ended.');
+}
+
+function checkTime(i) {
+  if (i < 10) {
+    i = "0" + i;
+  }
+  return i;
+}
+
+function currentTime() {
+  var today = new Date();
+  var h = today.getHours();
+  var m = today.getMinutes();
+  var s = today.getSeconds();
+  // add a zero in front of numbers<10
+  m = checkTime(m);
+  s = checkTime(s);
+  return `${h}:${m}:${s}`;
 }
 
 function loadServerSchema({ schema }) {
@@ -87,7 +105,8 @@ function loadServerSchema({ schema }) {
   return ast;
 }
 
-function generateTypeFiles({include, exclude, watch, src}, schemaAst) {
+function generateTypeFiles({include, exclude, src}, schemaAst) {
+  console.log('analyzing reason files...');
   let typeMap = createTypeMap(schemaAst);
 
   include = Array.isArray(include) ? include : [include];
@@ -107,19 +126,19 @@ function generateTypeFiles({include, exclude, watch, src}, schemaAst) {
 
   let nodes = generateNodes(gqlCodes, typeMap);
 
+  console.log('generating type files...');
+  const DEST_DIR = path.join(src, '.reasonql');
   nodes.forEach(node => {
-    generateTypeFile(node, typeMap);
+    generateTypeFile(DEST_DIR, node, typeMap);
   })
 }
 
-const DEST_DIR = './src/.reasonql';
-  fs.ensureDirSync(DEST_DIR);
-
-function generateTypeFile(node, typeMap) {
+function generateTypeFile(DEST_DIR, node, typeMap) {
   let code = generateReasonCode(node, typeMap);
   fs.writeFileSync(path.join(DEST_DIR, `${node.fileName}.re`), code);
 }
 
 module.exports = {
+  loadConfig,
   compileAll,
 }
