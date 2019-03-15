@@ -1,0 +1,3 @@
+type tweet = {
+  text: string,
+};
