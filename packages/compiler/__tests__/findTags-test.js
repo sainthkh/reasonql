@@ -1,4 +1,4 @@
-const {findTags} = require('../src/graphql-to-reason/tagFinder');
+const {findTags} = require('../src/tagFinder');
 
 describe('Find GraphQL tags', () => {
   it("parses simple file", () => {
