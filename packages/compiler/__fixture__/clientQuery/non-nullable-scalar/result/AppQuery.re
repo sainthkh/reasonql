@@ -24,7 +24,15 @@ type queryResult = {
 };
 
 type variablesType = Js.Dict.t(Js.Json.t);
-let encodeVariables: variablesType => Js.Json.t = vars => Js.Json.object_(vars);
+
+[%%raw {|
+var encodeVariables = function (res) {
+  return {}
+}
+|}]
+
+[@bs.val]external encodeVariablesJs: variablesType => Js.Json.t = "encodeVariables";
+let encodeVariables = encodeVariablesJs;
 
 [%%raw {|
 var decodeQueryResult = function (res) {
