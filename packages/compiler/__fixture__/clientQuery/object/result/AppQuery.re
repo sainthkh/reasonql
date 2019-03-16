@@ -56,13 +56,17 @@ type variablesType = {
   ss: option(string),
 };
 
-[@bs.deriving abstract]
-type queryVars = {
-  j: int,
-  ss: option(string),
-};
+[%%raw {|
+var encodeVariables = function (v) {
+  return {
+    j: v[0],
+    ss: v[1],
+  }
+}
+|}]
 
-let encodeVariables: variablesType => queryVars = (vars) => queryVars(~j=vars.j,~ss=vars.ss);
+[@bs.val]external encodeVariablesJs: variablesType => Js.Json.t = "encodeVariables";
+let encodeVariables = encodeVariablesJs;
 
 [%%raw {|
 var decodeB = function (res) {

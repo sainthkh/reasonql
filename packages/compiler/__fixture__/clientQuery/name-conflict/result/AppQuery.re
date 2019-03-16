@@ -59,7 +59,7 @@ type queryResult = {
 type variablesType = Js.Dict.t(Js.Json.t);
 
 [%%raw {|
-var encodeVariables = function (res) {
+var encodeVariables = function (v) {
   return {}
 }
 |}]
