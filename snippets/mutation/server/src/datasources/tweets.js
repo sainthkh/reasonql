@@ -1,25 +1,37 @@
+let id = 0;
+function newID() {
+  return ++id;
+}
+
+// TweetApi cleass is created every time when called.
+// So, we need to take it out from it.
+let tweets = [
+  {
+    id: newID(),
+    text: "Let's make ReasonML and GraphQL great!",
+  },
+  {
+    id: newID(),
+    text: "Hello, mini-twitter world!",
+  },
+];
+
 class TweetApi {
-  constructor() {
-    this.tweets = [
-      {
-        text: "Let's make ReasonML and GraphQL great!",
-      },
-      {
-        text: "Hello, mini-twitter world!",
-      },
-    ]
-  }
-
   async getTweets() {
-    return this.tweets;
+    return tweets;
   }
 
-  async save(text) {
+  async save({text, tempId}) {
     let tweet = {
+      id: newID(),
       text,
     }
-    this.tweets.unshift(tweet);
-    return tweet;
+    tweets.unshift(tweet);
+    return {
+      ...tweet,
+      success: true,
+      tempId,
+    };
   }
 }
 

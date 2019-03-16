@@ -9,6 +9,12 @@ let make = (
   ...component,
 
   render: _self => {
-    <p>{ ReasonReact.string(tweet.text) }</p>
+    <p>
+      <span>{ ReasonReact.string(tweet.text) }</span>
+      {switch(tweet.status) {
+      | Loaded => ReasonReact.null
+      | Waiting => <span>{ ReasonReact.string(" << Waiting for response.") }</span>
+      }}
+    </p>
   }
 }

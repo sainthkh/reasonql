@@ -2,6 +2,7 @@ const { gql } = require('apollo-server');
 
 const typeDefs = gql`
 type Tweet {
+  id: ID!
   text: String!
 }
 
@@ -11,10 +12,13 @@ type Query {
 
 input TweetInput {
   text: String!
+  tempId: String!
 }
 
 type TweetResponse {
-  sucess: Boolean!
+  success: Boolean!
+  id: ID!
+  tempId: ID!
   text: String!
 }
 

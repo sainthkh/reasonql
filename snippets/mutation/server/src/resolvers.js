@@ -6,8 +6,7 @@ module.exports = {
   },
   Mutation: {
     saveTweet(_, { tweet }, { dataSources }) {
-      dataSources.tweetAPI.save(tweet.text);
-      return {}
+      return dataSources.tweetAPI.save(tweet);
     },
   }
 }
