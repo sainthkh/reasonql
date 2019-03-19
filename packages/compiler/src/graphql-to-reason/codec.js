@@ -1,12 +1,12 @@
-function generateCodec(typeList, isFragment, fileName) {
+function generateDecoder(typeList, isFragment, fileName) {
   let arrayTypes = new Set();
   return `
-${generateFunctions(typeList, isFragment, fileName, arrayTypes)}
-${generateArrayDecoders(arrayTypes)}
+${decoderFunctions(typeList, isFragment, fileName, arrayTypes)}
+${decoderArrayDecoders(arrayTypes)}
 `.trim();
 }
 
-function generateFunctions(typeList, isFragment, fileName, arrayTypes) {
+function decoderFunctions(typeList, isFragment, fileName, arrayTypes) {
   let typeCodes = typeList.map(type => {
     let functionName = `decode${upperTheFirstCharacter(type.typeName)}`;
     functionName = isFragment
@@ -50,7 +50,7 @@ ${type.fields.map(field => {
   return typeCodes.join('\n\n');
 }
 
-function generateArrayDecoders(arrayTypes) {
+function decoderArrayDecoders(arrayTypes) {
   let arrayDecoders = Array.from(arrayTypes).map(type => {
     return `
 var decode${type.typeName}Array = function (arr) {
@@ -74,4 +74,71 @@ function upperTheFirstCharacter(name) {
   return name[0].toUpperCase() + name.substring(1);
 }
 
-exports.generateCodec = generateCodec;
+function generateEncoder(args) {
+  let encoder = '';
+  if(args.length == 0) {
+    encoder = `
+var encodeVariables = function (v) {
+  return {}
+}`.trim();
+  } else {
+    let arrayTypes = new Set();
+    encoder = `
+${encoderFunctions(args, arrayTypes)}
+${encoderArrayFunctions(args, arrayTypes)}
+`.trim();
+  }
+
+  return `
+[%%raw {|
+${encoder}
+|}]
+
+[@bs.val]external encodeVariablesJs: variablesType => Js.Json.t = "encodeVariables";
+let encodeVariables = encodeVariablesJs;
+`.trim();
+}
+
+function encoderFunctions(args, arrayTypes) {
+  let argCodes = args.map(arg => {
+    let typeName = arg.typeName == "variablesType"
+      ? "Variables"
+      : upperTheFirstCharacter(arg.typeName)
+    return `
+var encode${typeName} = function (v) {
+  return {
+${arg.fields.map((field, i) => {
+  let v = `v[${i}]`
+  if(field.scalar) {
+    return `    ${field.name}: ${v},`;
+  } else {
+    let fieldTypeName = upperTheFirstCharacter(field.typeName);
+    let encoderName = field.array
+      ? `encode${fieldTypeName}Array`
+      : `encode${fieldTypeName}`;
+    
+    if (field.array) {
+      arrayTypes.add({
+        typeName,
+        contentOption: field.contentOption,
+      })
+    }
+
+    return field.option
+      ? `    ${field.name}: ${v} ? ${encoderName}(${v}) : undefined,`
+      : `    ${field.name}: ${encoderName}(${v}),`
+  }
+}).join('\n')}
+  }
+}`.trim();
+  })
+
+  return argCodes.join('\n\n');
+}
+
+function encoderArrayFunctions(args, arrayTypes) {
+  return '';
+}
+
+exports.generateDecoder = generateDecoder;
+exports.generateEncoder = generateEncoder;

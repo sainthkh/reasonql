@@ -1,6 +1,6 @@
 const {parse} = require('graphql');
 const {makeTypeList, argumentTypes} = require('./type');
-const {generateCodec} = require('./codec');
+const {generateDecoder} = require('./codec');
 
 function generateNodes(gqlCodes, typeMap) {
   let nodes = gqlCodes.map(code => {
@@ -25,8 +25,8 @@ function generateNodes(gqlCodes, typeMap) {
       isFragment,
       fileName,
       typeList,
-      codec: generateCodec(typeList, isFragment, fileName),
-      args: argumentTypes(queryRoot.variableDefinitions),
+      codec: generateDecoder(typeList, isFragment, fileName),
+      args: argumentTypes(queryRoot.variableDefinitions, typeMap),
     }
   });
 

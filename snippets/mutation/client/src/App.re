@@ -27,7 +27,7 @@ let query = ReasonQL.gql({|
 |})
 
 let saveTweet = ReasonQL.gql({|
-  mutation SaveTweetMutation($tweet: TweetInput) {
+  mutation SaveTweetMutation($tweet: TweetInput!) {
     saveTweet(tweet: $tweet) {
       success
       id

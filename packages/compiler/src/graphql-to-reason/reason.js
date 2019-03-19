@@ -1,3 +1,5 @@
+const { generateEncoder } = require('./codec');
+
 function generateReasonCode(node) {
   let {typeList, args} = node;
   return node.isFragment
@@ -24,7 +26,9 @@ let query = {|${cleanCode(node.code)}|}
 
 ${generateTypeCode(typeList)}
 
-${generateVariablesEncoder(args)}
+${generateVariableTypes(args)}
+
+${generateEncoder(args)}
 
 [%%raw {|
 ${node.codec}
@@ -110,32 +114,12 @@ function wrapTypeName(field) {
   return field.option? `option(${typeName})` : typeName;
 }
 
-function generateVariablesEncoder(args) {
-  if(args.length > 0) {
-    let variableArgs = generateVariablesArgs(args[0].fields);
-    return `
-${generateTypeCode(args)}
-
-let encodeVariables: variablesType => queryVars = (vars) => queryVars(${variableArgs});
-`.trim();
+function generateVariableTypes(args) {
+  if(args.length == 0) {
+    return 'type variablesType = Js.Dict.t(Js.Json.t);';
   } else {
-    return `
-type variablesType = Js.Dict.t(Js.Json.t);
-
-[%%raw {|
-var encodeVariables = function (v) {
-  return {}
-}
-|}]
-
-[@bs.val]external encodeVariablesJs: variablesType => Js.Json.t = "encodeVariables";
-let encodeVariables = encodeVariablesJs;
-`.trim();
+    return generateTypeCode(args);
   }
-}
-
-function generateVariablesArgs(fields) {
-  return fields.map(field => `~${field.name}=vars.${field.name}`).join(',')
 }
 
 exports.generateReasonCode = generateReasonCode;

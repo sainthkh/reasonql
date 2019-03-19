@@ -1,0 +1,24 @@
+type Tweet {
+  id: ID!
+  text: String!
+}
+
+type Query {
+  tweets: [Tweet!]!
+}
+
+input TweetInput {
+  text: String!
+  tempId: String!
+}
+
+type TweetResponse {
+  success: Boolean!
+  id: ID!
+  tempId: ID!
+  text: String!
+}
+
+type Mutation {
+  saveTweet(tweet: TweetInput): TweetResponse!
+}

@@ -21,14 +21,15 @@ describe(`client query tests`, () => {
     // Code for partial test.
     // Commented out for later use. 
     let tests = [
-      'non-nullable-scalar', 
-      'nullable-scalar', 
-      'array',
-      //'object',
-      'fragment-simple',
-      'fragment-diamond',
-      'fragment-multiple-in-one',
-      'name-conflict',
+      //'non-nullable-scalar', 
+      //'nullable-scalar', 
+      //'array',
+      'object',
+      //'fragment-simple',
+      //'fragment-diamond',
+      //'fragment-multiple-in-one',
+      //'name-conflict',
+      'mutation',
     ];
     if(!tests.includes(path.basename(fixture))) return;
     //*/

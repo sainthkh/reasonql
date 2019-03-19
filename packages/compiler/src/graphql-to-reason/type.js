@@ -2,13 +2,23 @@ function makeTypeList(queryRoot, isFragment, typeMap) {
   let types = {};
   let rootType = isFragment 
     ? queryRoot.typeCondition.name.value
-    : "Query"
+    : operationToTypeName(queryRoot.operation);
   extractType(types, queryRoot, [], typeMap, rootType);
 
   let typeList = childTypes(types, types[rootType]);
   typeList = validTypeNames(types, typeList);
 
   return typeList;
+}
+
+function operationToTypeName(operation) {
+  let names = {
+    "query": "Query",
+    "mutation": "Mutation",
+    "subscription": "Subscription",
+  };
+
+  return names[operation];
 }
 
 function extractType(types, ast, selectionNames, typeMap, currentType, userDefinedTypeName) {
@@ -24,7 +34,7 @@ function extractType(types, ast, selectionNames, typeMap, currentType, userDefin
       }
     } else {
       let name = selection.name.value;
-      let typeObj = typeMap[currentType].fields[selection.name.value];
+      let typeObj = typeMap[currentType].fieldMap[selection.name.value];
       let typeName = typeObj.type;
       
       let userDefinedType = undefined;
@@ -93,7 +103,8 @@ function validTypeNames(types, typeList) {
       return prev.includes(curr) 
         ? prev.filter(name => name != curr)
         : [...prev, curr]
-    }, []);
+    }, [])
+    .filter(name => !!name); // Remove undefined from the list. 
   
   for(var i = 0; i < typeList.length; i++) {
     let type = typeList[i];
@@ -108,30 +119,32 @@ function validTypeNames(types, typeList) {
   return typeList;
 }
 
-function argumentTypes(args) {
+function argumentTypes(args, typeMap) {
   // When args is from Fragments, it's undefined. 
   if(!args) {
     return []
   }
 
   let fields = args.map(arg => {
-    return decodeType(arg.variable.name.value, arg);
+    let field = decodeType(arg.variable.name.value, arg);
+    return {
+      ...field,
+      scalar: isScalar(field.type),
+    }
   })
 
   let list = [];
   if (fields.length > 0) {
-    let types = [];
-    types.push({
+    fields.forEach(field => {
+      if(!isScalar(field.type)) {
+        list = [...list, ...childTypes(typeMap, typeMap[field.type])];
+      }
+    });
+
+    list.push({
       name: 'variablesType',
       fields,
     });
-    types.push({
-      name: 'queryVars',
-      fields,
-      abstract: true,
-    });
-
-    list = types;
   }
 
   let map = {};
@@ -168,8 +181,7 @@ function getValidTypeName(types, unconflictedNames, typeName) {
         : unconflictedNames.includes(selectionName)
           ? selectionName
           : typeName
-
-    name = isRootName(name) ? name + "Result" : name;
+    name = isRootName(name) ? "queryResult" : name;
 
     return lowerTheFirstCharacter(name);
   }
@@ -238,17 +250,21 @@ function createTypeMap(ast) {
   let types = {}
   ast.definitions.forEach(definition => {
     let kind = definition.kind;
-    if (kind == "ObjectTypeDefinition") {
+    if (kind == "ObjectTypeDefinition" || kind == "InputObjectTypeDefinition") {
       let name = definition.name.value;
-      let fields = {}
+      let fields = []
+      let fieldMap = {}
       definition.fields.forEach(field => {
         let data = decodeType(field.name.value, field);
-        fields[data.name] = data;
+        data.scalar = isScalar(data.type);
+        fields.push(data);
+        fieldMap[data.name] = data;
       })
 
       types[name] = {
         name,
         fields,
+        fieldMap,
       }
     }
   });

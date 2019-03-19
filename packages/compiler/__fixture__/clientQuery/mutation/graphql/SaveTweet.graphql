@@ -1,0 +1,8 @@
+mutation SaveTweetMutation($tweet: TweetInput!) {
+  saveTweet(tweet: $tweet) {
+    success
+    id
+    tempId
+    text
+  }
+}
