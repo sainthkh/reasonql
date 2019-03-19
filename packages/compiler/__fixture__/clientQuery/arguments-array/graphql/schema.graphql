@@ -1,0 +1,8 @@
+type Point {
+  x: Int!
+  y: Int!
+}
+
+type Mutation {
+  calcLength(points: [Point!]!): Float!
+}

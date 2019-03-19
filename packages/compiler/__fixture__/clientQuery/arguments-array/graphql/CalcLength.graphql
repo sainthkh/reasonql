@@ -1,0 +1,3 @@
+mutation CalcLengthMutation($points: [Point!]!) {
+  calcLength(points: $points)
+}

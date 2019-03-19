@@ -85,7 +85,7 @@ var encodeVariables = function (v) {
     let arrayTypes = new Set();
     encoder = `
 ${encoderFunctions(args, arrayTypes)}
-${encoderArrayFunctions(args, arrayTypes)}
+${encoderArrayFunctions(arrayTypes)}
 `.trim();
   }
 
@@ -119,7 +119,7 @@ ${arg.fields.map((field, i) => {
     
     if (field.array) {
       arrayTypes.add({
-        typeName,
+        typeName: fieldTypeName,
         contentOption: field.contentOption,
       })
     }
@@ -136,8 +136,24 @@ ${arg.fields.map((field, i) => {
   return argCodes.join('\n\n');
 }
 
-function encoderArrayFunctions(args, arrayTypes) {
-  return '';
+function encoderArrayFunctions(arrayTypes) {
+  let arrayEncoders = Array.from(arrayTypes).map(type => {
+    return `
+var encode${type.typeName}Array = function (ar) {
+  let r = [];
+  ar.forEach(v =>
+    ${
+      type.contentOption
+      ? `r.push(v ? encode${type.typeName}(v) : undefined)`
+      : `r.push(encode${type.typeName}(v))`
+    }
+  );
+  return r;
+}`.trim();
+  })
+  return arrayEncoders.length > 0
+    ? `\n${arrayEncoders.join('\n\n')}\n`
+    : '';
 }
 
 exports.generateDecoder = generateDecoder;

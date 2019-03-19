@@ -30,6 +30,7 @@ describe(`client query tests`, () => {
       //'fragment-multiple-in-one',
       //'name-conflict',
       'mutation',
+      'arguments-array',
     ];
     if(!tests.includes(path.basename(fixture))) return;
     //*/
