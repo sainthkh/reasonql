@@ -1,13 +1,18 @@
 const { gql } = require('apollo-server');
 
 const typeDefs = gql`
-type Greeting {
-    id: ID!
-    message: String!
+type Content {
+  id: ID!
+  common: String!
+  premium: String!
 }
 
 type Query {
-    hello(time: String): Greeting
+  content(token: String): Content!
+}
+
+type Mutation {
+  login(email: String!, password: String!): String
 }
 `
 
