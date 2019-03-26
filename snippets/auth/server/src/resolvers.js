@@ -22,13 +22,27 @@ async function sign(payload) {
   return await promise;
 }
 
+function verifyToken(token) {
+  try {
+    jwt.verify(token, jwtSecret);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 module.exports = {
   Query: {
     content: function(_, { token }, __) {
+      let premium = "Premium content - Sign up to see this";  
+      if (verifyToken(token)) {
+        premium = "Now, you can see the premium content";
+      } 
+
       return {
         id: "1234",
         common: "Common content - Hello, GraphQL World!",
-        premium: "Premium content - Sign up to see this",
+        premium,
       };
     },
   },
