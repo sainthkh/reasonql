@@ -272,6 +272,32 @@ function createTypeMap(ast) {
   return types;
 }
 
+function errorTypes(ast) {
+  let types = [];
+  ast.definitions.forEach(definition => {
+    let kind = definition.kind;
+    if (kind == "ObjectTypeDefinition") {
+      let name = definition.name.value;
+      let fields = [];
+      definition.fields.forEach(field => {
+        let data = decodeType(field.name.value, field);
+        data.scalar = isScalar(data.type);
+        data.typeName = lowerTheFirstCharacter(data.type);
+        fields.push(data);
+      })
+
+      types.push({
+        name,
+        typeName: lowerTheFirstCharacter(name), 
+        fields,
+      })
+    }
+  })
+
+  return types;
+}
+
 exports.createTypeMap = createTypeMap;
+exports.errorTypes = errorTypes;
 exports.makeTypeList = makeTypeList;
 exports.argumentTypes = argumentTypes;

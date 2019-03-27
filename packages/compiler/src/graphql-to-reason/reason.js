@@ -122,4 +122,5 @@ function generateVariableTypes(args) {
   }
 }
 
+exports.generateTypeCode = generateTypeCode;
 exports.generateReasonCode = generateReasonCode;

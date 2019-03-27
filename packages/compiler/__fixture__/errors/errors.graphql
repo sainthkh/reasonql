@@ -1,0 +1,5 @@
+type LoginFormError {
+  code: String!
+  email: String
+  password: String
+}

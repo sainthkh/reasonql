@@ -7,6 +7,7 @@ const {parse} = require('graphql');
 const { findTags } = require('./tagFinder');
 const {
   generateReasonCode,
+  generateErrorsCode,
   createTypeMap,
   generateNodes,
 } = require('./graphql-to-reason');
@@ -21,6 +22,7 @@ function loadConfig(dir) {
   let conf = require(configPath);
   conf = Object.assign({
     schema: '',
+    errors: false,
     localschema: '',
     src: './src',
     include: '**',
@@ -40,6 +42,7 @@ function compileAll(conf) {
   console.log('');
   console.log(`[${currentTime()}] compile started`);
   let ast = loadServerSchema(conf);
+  generateErrorSchema(conf);
   generateTypeFiles(conf, ast);
   console.log('compile ended.');
 }
@@ -107,6 +110,25 @@ function loadServerSchema({ schema }) {
   }
 
   return ast;
+}
+
+function generateErrorSchema({ errors, src }) {
+  let ast = {};
+  if (errors) {
+    const schemaPath = path.join(process.cwd(), errors);
+
+    if(fs.existsSync(schemaPath)) {
+      let code = fs.readFileSync(schemaPath).toString();
+      ast = parse(code);
+      let reason = generateErrorsCode(ast);
+      const DEST_DIR = path.join(src, '.reasonql');
+      fs.writeFileSync(path.join(DEST_DIR, `QueryErrors.re`), reason);
+    } else {
+      console.log("File doesn't exist.");
+    }
+  } else {
+    console.log("Error schema isn't defined. Skip this step.");
+  }
 }
 
 function generateTypeFiles({include, exclude, src}, schemaAst) {
