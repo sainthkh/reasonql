@@ -1,5 +1,23 @@
 let gql = code => code;
 
+type apolloErrorJs = Js.t({.
+  message: string,
+  extensions: Js.Json.t,
+})
+
+type apolloError = {
+  message: string,
+  extensions: Js.Json.t,
+};
+
+let decodeError: array(apolloErrorJs) => array(apolloError) 
+= errors => {
+  errors |> Array.map(err => {
+    message: err##message,
+    extensions: err##extensions,
+  })
+};
+
 module type Client = {
   let url: string;
 };
@@ -17,6 +35,7 @@ module type Query = {
 module MakeRequest = (Q: Query, C: Client) => {
   type apolloResultJs = Js.t({.
     data: Js.Json.t,
+    errors: option(array(apolloErrorJs)),
   });
 
   type response = Js.t({.
@@ -53,4 +72,22 @@ module MakeRequest = (Q: Query, C: Client) => {
     })
     |> ignore;
   };
+
+  let finishedWithError: (Js.Promise.t(apolloResultJs), (Q.queryResult, option(array(apolloError))) => unit) => unit
+  = (promise, f) => {
+    open Js.Promise;
+
+    promise 
+    |> then_(json => {
+      let data = Q.decodeQueryResult(json##data);
+      let errors = 
+        switch(json##errors) {
+        | Some(errors) => Some(decodeError(errors));
+        | None => None
+        }
+      
+      resolve(f(data, errors))
+    })
+    |> ignore;
+  }
 }
