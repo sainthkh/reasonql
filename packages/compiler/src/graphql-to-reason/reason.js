@@ -88,8 +88,8 @@ function cleanCode(code) {
 
 function generateTypeCode(typeList) {
   return typeList.map(type => {    
-    return (type.abstract ? `[@bs.deriving abstract]\n` : ``)
-+ `type ${type.typeName} = {
+    return `
+type ${type.typeName} = {
 ${
   type.fields.map(field => {
     return `  ${field.name}: ${wrapTypeName(field)},`
