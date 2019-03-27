@@ -13,7 +13,11 @@ let watch = argv.w || argv.watch || conf.watch;
 console.log('removing .reasonql directory...');
 const DEST_DIR = path.join(cwd, conf.src, `.reasonql`);
 fs.ensureDirSync(DEST_DIR);
-fs.removeSync(DEST_DIR);
+try {
+  fs.removeSync(DEST_DIR);
+} catch(e) {
+  console.log(`couldn't remove directory.`)
+}
 fs.ensureDirSync(DEST_DIR);
 
 compileAll(conf);
