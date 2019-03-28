@@ -1,3 +1,5 @@
+const { upperTheFirstCharacter } = require('./util');
+
 function generateDecoder(typeList, isFragment, fileName) {
   let arrayTypes = new Set();
   return `
@@ -68,10 +70,6 @@ var decode${type.typeName}Array = function (arr) {
   return arrayDecoders.length > 0
     ? `\n${arrayDecoders.join('\n\n')}\n`
     : ''
-}
-
-function upperTheFirstCharacter(name) {
-  return name[0].toUpperCase() + name.substring(1);
 }
 
 function generateEncoder(args) {

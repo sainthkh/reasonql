@@ -8,6 +8,7 @@ const { findTags } = require('./tagFinder');
 const {
   generateReasonCode,
   generateErrorsCode,
+  generateEnumTypesCode,
   createTypeMap,
   generateNodes,
 } = require('./graphql-to-reason');
@@ -43,6 +44,7 @@ function compileAll(conf) {
   console.log(`[${currentTime()}] compile started`);
   let ast = loadServerSchema(conf);
   generateErrorSchema(conf);
+  generateEnumTypesFile(conf, ast);
   generateTypeFiles(conf, ast);
   console.log('compile ended.');
 }
@@ -128,6 +130,17 @@ function generateErrorSchema({ errors, src }) {
     }
   } else {
     console.log("Error schema isn't defined. Skip this step.");
+  }
+}
+
+function generateEnumTypesFile({ src }, ast) {
+  let reason = generateEnumTypesCode(ast);
+
+  if(reason != '') {
+    const DEST_DIR = path.join(src, '.reasonql');
+    fs.writeFileSync(path.join(DEST_DIR, `EnumTypes.re`), reason);
+  } else {
+    console.log("No enum types. Skip this phase.")
   }
 }
 

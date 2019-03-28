@@ -1,3 +1,5 @@
+const { lowerTheFirstCharacter } = require('./util');
+
 function makeTypeList(queryRoot, isFragment, typeMap) {
   let types = {};
   let rootType = isFragment 
@@ -201,10 +203,6 @@ function isFragmentTypeName(type) {
   return type.includes(".");
 }
 
-function lowerTheFirstCharacter(name) {
-  return name[0].toLowerCase() + name.substring(1);
-}
-
 function decodeType(name, field) {
   switch(field.type.kind) {
   case "NamedType": 
@@ -297,7 +295,27 @@ function errorTypes(ast) {
   return types;
 }
 
+function enumTypes(ast) {
+  let types = [];
+  ast.definitions
+  .filter(def => def.kind == "EnumTypeDefinition")
+  .forEach(definition => {
+    let values = [];
+    definition.values.forEach(v => {
+      values.push(v.name.value);
+    });
+
+    types.push({
+      name: definition.name.value,
+      values,
+    });
+  })
+
+  return types;
+}
+
 exports.createTypeMap = createTypeMap;
 exports.errorTypes = errorTypes;
+exports.enumTypes = enumTypes;
 exports.makeTypeList = makeTypeList;
 exports.argumentTypes = argumentTypes;

@@ -1,0 +1,16 @@
+enum PatchSize {
+  SMALL
+  MEDIUM
+  LARGE
+  EXTRA_LARGE
+}
+
+type Mission {
+  name: String!
+  missionPatch(size: PatchSize): String!
+}
+
+type Star {
+  name: String!
+  imageSize: PatchSize!
+}
