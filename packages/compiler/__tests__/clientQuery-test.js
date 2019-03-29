@@ -24,13 +24,14 @@ describe(`client query tests`, () => {
       //'non-nullable-scalar', 
       //'nullable-scalar', 
       //'array',
-      'object',
+      //'object',
       //'fragment-simple',
       //'fragment-diamond',
       //'fragment-multiple-in-one',
       //'name-conflict',
-      'mutation',
-      'arguments-array',
+      //'mutation',
+      //'arguments-array',
+      'enum',
     ];
     if(!tests.includes(path.basename(fixture))) return;
     //*/

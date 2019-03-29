@@ -1,14 +1,18 @@
 const { upperTheFirstCharacter } = require('./util');
 
 function generateDecoder(typeList, isFragment, fileName) {
+  let enumTypes = new Set();
   let arrayTypes = new Set();
+
+  let functions = decoderFunctions(typeList, isFragment, fileName, arrayTypes, enumTypes);
   return `
-${decoderFunctions(typeList, isFragment, fileName, arrayTypes)}
-${decoderArrayDecoders(arrayTypes)}
+${requireEnumDecoders(enumTypes)}
+${functions}
+${arrayDecoders(arrayTypes)}
 `.trim();
 }
 
-function decoderFunctions(typeList, isFragment, fileName, arrayTypes) {
+function decoderFunctions(typeList, isFragment, fileName, arrayTypes, enumTypes) {
   let typeCodes = typeList.map(type => {
     let functionName = `decode${upperTheFirstCharacter(type.typeName)}`;
     functionName = isFragment
@@ -23,6 +27,11 @@ ${type.fields.map(field => {
 
   if(field.scalar) {
     return `    ${varname},`;
+  } else if (field.enum) {
+    let [_, typeName] = field.type.split('.');
+    typeName = upperTheFirstCharacter(typeName);
+    enumTypes.add(typeName);
+    return `    decode${typeName}(${varname}),`;
   } else if(field.fragment) {
     let [component, typeName] = field.type.split('.');
     typeName = upperTheFirstCharacter(typeName);
@@ -52,7 +61,13 @@ ${type.fields.map(field => {
   return typeCodes.join('\n\n');
 }
 
-function decoderArrayDecoders(arrayTypes) {
+function requireEnumDecoders(enumTypes) {
+  return enumTypes.size > 0
+    ? `const { ${Array.from(enumTypes).map(en => `decode${en}`).join(', ')} } = require('./EnumTypes.bs');\n`
+    : ''
+}
+
+function arrayDecoders(arrayTypes) {
   let arrayDecoders = Array.from(arrayTypes).map(type => {
     return `
 var decode${type.typeName}Array = function (arr) {
@@ -80,10 +95,14 @@ var encodeVariables = function (v) {
   return {}
 }`.trim();
   } else {
+    let enumTypes = new Set();
     let arrayTypes = new Set();
+
+    let functions = encoderFunctions(args, arrayTypes, enumTypes);
     encoder = `
-${encoderFunctions(args, arrayTypes)}
-${encoderArrayFunctions(arrayTypes)}
+${requireEnumEncoders(enumTypes)}
+${functions}
+${arrayEncoders(arrayTypes)}
 `.trim();
   }
 
@@ -97,7 +116,7 @@ let encodeVariables = encodeVariablesJs;
 `.trim();
 }
 
-function encoderFunctions(args, arrayTypes) {
+function encoderFunctions(args, arrayTypes, enumTypes) {
   let argCodes = args.map(arg => {
     let typeName = arg.typeName == "variablesType"
       ? "Variables"
@@ -109,6 +128,11 @@ ${arg.fields.map((field, i) => {
   let v = `v[${i}]`
   if(field.scalar) {
     return `    ${field.name}: ${v},`;
+  } else if(field.enum) {
+    let [_, typeName] = field.type.split('.');
+    typeName = upperTheFirstCharacter(typeName);
+    enumTypes.add(typeName);
+    return `    ${field.name}: encode${typeName}(${v}),`;
   } else {
     let fieldTypeName = upperTheFirstCharacter(field.typeName);
     let encoderName = field.array
@@ -134,7 +158,13 @@ ${arg.fields.map((field, i) => {
   return argCodes.join('\n\n');
 }
 
-function encoderArrayFunctions(arrayTypes) {
+function requireEnumEncoders(enumTypes) {
+  return enumTypes.size > 0
+    ? `const { ${Array.from(enumTypes).map(en => `encode${en}`).join(', ')} } = require('./EnumTypes.bs');\n`
+    : ''
+}
+
+function arrayEncoders(arrayTypes) {
   let arrayEncoders = Array.from(arrayTypes).map(type => {
     return `
 var encode${type.typeName}Array = function (ar) {

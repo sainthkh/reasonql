@@ -37,29 +37,36 @@ function extractType(types, ast, selectionNames, typeMap, currentType, userDefin
     } else {
       let name = selection.name.value;
       let typeObj = typeMap[currentType].fieldMap[selection.name.value];
-      let typeName = typeObj.type;
-      
-      let userDefinedType = undefined;
-      if (selection.directives.length > 0) {
-        selection.directives.forEach(d => {
-          let name = d.name.value;
-          if(name == "singular" || name == "reasontype") {
-            userDefinedType = d.arguments[0].value.value;
-          }
-        })
-      }
+      if(typeObj.enum) {
+        return {
+          name, 
+          type: `EnumTypes.${lowerTheFirstCharacter(typeObj.type)}`,
+          enum: true,
+        }
+      } else {
+        let typeName = typeObj.type;
+        let userDefinedType = undefined;
+        if (selection.directives.length > 0) {
+          selection.directives.forEach(d => {
+            let name = d.name.value;
+            if(name == "singular" || name == "reasontype") {
+              userDefinedType = d.arguments[0].value.value;
+            }
+          })
+        }
 
-      if(selection.selectionSet) {
-        extractType(types, selection, [...selectionNames, name], typeMap, typeName, userDefinedType);
-      }
+        if(selection.selectionSet) {
+          extractType(types, selection, [...selectionNames, name], typeMap, typeName, userDefinedType);
+        }
 
-      return {
-        ...typeObj,
-        name,
-        type: isScalar(typeName)
-          ? typeName
-          : [...selectionNames, name, typeName].join('_'),
-        scalar: isScalar(typeName)
+        return {
+          ...typeObj,
+          name,
+          type: isScalar(typeName)
+            ? typeName
+            : [...selectionNames, name, typeName].join('_'),
+          scalar: isScalar(typeName)
+        }
       }
     }
   })
@@ -131,14 +138,16 @@ function argumentTypes(args, typeMap) {
     let field = decodeType(arg.variable.name.value, arg);
     return {
       ...field,
+      type: `EnumTypes.${lowerTheFirstCharacter(field.type)}`,
       scalar: isScalar(field.type),
+      enum: typeMap[field.type].enum,
     }
   })
 
   let list = [];
   if (fields.length > 0) {
     fields.forEach(field => {
-      if(!isScalar(field.type)) {
+      if(!isScalar(field.type) && !field.enum) {
         list = [...list, ...childTypes(typeMap, typeMap[field.type])];
       }
     });
@@ -246,6 +255,13 @@ function decodeType(name, field) {
 
 function createTypeMap(ast) {
   let types = {}
+  let enums = [];
+  ast.definitions
+  .filter(def => def.kind == "EnumTypeDefinition")
+  .forEach(def => {
+    enums.push(def.name.value);
+  });
+
   ast.definitions.forEach(definition => {
     let kind = definition.kind;
     if (kind == "ObjectTypeDefinition" || kind == "InputObjectTypeDefinition") {
@@ -255,6 +271,7 @@ function createTypeMap(ast) {
       definition.fields.forEach(field => {
         let data = decodeType(field.name.value, field);
         data.scalar = isScalar(data.type);
+        data.enum = enums.includes(data.type);
         fields.push(data);
         fieldMap[data.name] = data;
       })
@@ -263,6 +280,14 @@ function createTypeMap(ast) {
         name,
         fields,
         fieldMap,
+      }
+    } else if (kind == "EnumTypeDefinition") {
+      let name = definition.name.value;
+      types[name] = {
+        name,
+        enum: true,
+        fields: [],
+        fieldMap: {},
       }
     }
   });

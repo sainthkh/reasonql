@@ -1,0 +1,10 @@
+query TestEnum($size: PatchSize) {
+  planet {
+    name
+    imageSize
+  }
+  mission {
+    name
+    missionPatch(size: $size)
+  }
+}
