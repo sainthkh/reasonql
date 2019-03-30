@@ -24,7 +24,6 @@ function loadConfig(dir) {
   conf = Object.assign({
     schema: '',
     errors: false,
-    localschema: '',
     src: './src',
     include: '**',
     exclude: [
