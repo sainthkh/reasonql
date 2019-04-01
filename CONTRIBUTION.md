@@ -4,14 +4,12 @@ Thank you for showing interests. Here are some tips for contribution.
 
 ## Install Dependencies. 
 
-ReasonQL project uses Lerna with --hoist option. Because without it, some common libraries like reason-react can be duplicate and show warning messages. 
+ReasonQL project uses Lerna with `--hoist` option. Because without it, some common libraries like reason-react can be duplicate and show warning messages. 
 
-And Lerna doesn't generate good command files(.cmd) in Windows, this project automatically copies script files to .bin folder.
-
-Because of this, don't use `npm install` or `yarn install`. Instead, use:
+So, install dependencies with `lerna bootstrap` command. 
 
 ```
-npm run bootstrap
+lerna bootstrap
 ```
 
 ## Project Structure

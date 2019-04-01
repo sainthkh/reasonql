@@ -3,11 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "add": "lerna add",
-    "postadd": "npm run setup",
-    "bootstrap": "lerna bootstrap",
-    "postbootstrap": "npm run setup",
-    "setup": "node scripts/setup.js"
   },
   "license": "MIT",
   "devDependencies": {
