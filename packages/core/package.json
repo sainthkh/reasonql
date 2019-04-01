@@ -1,6 +1,9 @@
 {
   "name": "@reasonql/core",
-  "version": "0.1.1",
+  "version": "0.1.2",
+  "description": "Type-safe and simple GraphQL client for ReasonML",
+  "homepage": "https://github.com/sainthkh/reasonql",
+  "bugs": "https://github.com/sainthkh/reasonql/issues",
   "files": [
     "src"
   ],
