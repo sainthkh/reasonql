@@ -26,6 +26,15 @@ yarn add @reasonql/core
 yarn add @reasonql/compiler --dev
 ```
 
+And add @reasonql/core in `bs-dependencies` under bsconfig.json.
+
+```json
+"bs-dependencies": [
+  "@reasonql/core",
+  "reason-react",
+]
+```
+
 ## How to use ReasonQL.
 
 This document assumes that you're familiar with ReasonML and GraphQL. If you're not sure what GraphQL is, [check the offical documentation](https://graphql.org/learn/). 
