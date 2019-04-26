@@ -8,7 +8,7 @@ ReasonQL does 2 things for you:
 * and decode that data and error messages from JSON to ReasonML record. 
 
 You might think it's too simple and you're now finding cool features like cache, "fetch more", reload, auth, etc.
-==> If so, please check ["Why I started this project"](WHY.md).
+==> If so, please check ["Why I started this project"](../../WHY.md).
 
 ## Installation. 
 
@@ -122,7 +122,7 @@ As `send` returns a `Js.Promise` and `finished` and `finishedWithError` have pro
 
 You learned the basics of ReasonQL. Unlike other libraries like Apollo or Relay, you don't need to create React components to use GraphQL. 
 
-If you want to know how to make "hello world" with ReasonQL, [check the example.](/snippets/hello-world) 
+If you want to know how to make "hello world" with ReasonQL, [check the example.](../snippets/hello-world) 
 
 
 
@@ -372,7 +372,7 @@ let make = (
   /* Code here */
 }
 ```
-[You can read the full code here.](/snippets/fragments/client/src/Post.re)
+[You can read the full code here.](../snippets/fragments/client/src/Post.re)
 
 Then, ReasonQL compiler magically merges fragments into the main query. 
 
@@ -408,7 +408,7 @@ SaveTweet.send({
   Js.log("data recieved");
 })
 ```
-[You can read the full code here.](/snippets/mutation/client/src/App.re)
+[You can read the full code here.](../snippets/mutation/client/src/App.re)
 
 ### Errors
 
@@ -469,4 +469,4 @@ Login.send({ email, password })
 
 ## Contribution
 
-Helps are always welcome. If you want to check how to contribute to the project, [check this document](CONTRIBUTION.md). 
+Helps are always welcome. If you want to check how to contribute to the project, [check this document](../../CONTRIBUTION.md). 
