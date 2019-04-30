@@ -1,7 +1,7 @@
 const lineColumn = require('line-column');
 
 function findTags(text) {
-  let re = /gql\({\|([\s\S]*)\|}\)/g;
+  let re = /gql\({\|([\s\S]*?)\|}\)/g;
 
   let tags = [];
   let result;
