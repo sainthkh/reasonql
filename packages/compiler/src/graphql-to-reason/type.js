@@ -136,11 +136,15 @@ function argumentTypes(args, typeMap) {
 
   let fields = args.map(arg => {
     let field = decodeType(arg.variable.name.value, arg);
+    let isEnum = typeMap[field.type].enum;
     return {
       ...field,
-      type: `EnumTypes.${lowerTheFirstCharacter(field.type)}`,
+      typeName: field.type,
+      type: isEnum 
+        ? `EnumTypes.${lowerTheFirstCharacter(field.type)}`
+        : lowerTheFirstCharacter(field.type),
       scalar: isScalar(field.type),
-      enum: typeMap[field.type].enum,
+      enum: isEnum,
     }
   })
 
@@ -148,7 +152,7 @@ function argumentTypes(args, typeMap) {
   if (fields.length > 0) {
     fields.forEach(field => {
       if(!isScalar(field.type) && !field.enum) {
-        list = [...list, ...childTypes(typeMap, typeMap[field.type])];
+        list = [...list, ...childTypes(typeMap, typeMap[field.typeName])];
       }
     });
 
@@ -184,6 +188,8 @@ function getValidTypeName(types, unconflictedNames, typeName) {
     return typeName;
   } else if(typeName.includes('#')) { // For fragment type definition.
     return typeName.split('#')[1];
+  } else if(types['variablesType']) {
+    return lowerTheFirstCharacter(typeName);
   } else {
     let {selectionName, userDefinedTypeName} = types[typeName];
     let name = 
