@@ -136,7 +136,7 @@ function argumentTypes(args, typeMap) {
 
   let fields = args.map(arg => {
     let field = decodeType(arg.variable.name.value, arg);
-    let isEnum = typeMap[field.type].enum;
+    let isEnum = !isScalar(field.type) && typeMap[field.type].enum;
     return {
       ...field,
       typeName: field.type,
