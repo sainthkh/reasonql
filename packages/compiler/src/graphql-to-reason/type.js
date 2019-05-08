@@ -39,6 +39,7 @@ function extractType(types, ast, selectionNames, typeMap, currentType, userDefin
       let typeObj = typeMap[currentType].fieldMap[selection.name.value];
       if(typeObj.enum) {
         return {
+          ...typeObj,
           name, 
           type: `EnumTypes.${lowerTheFirstCharacter(typeObj.type)}`,
           enum: true,
