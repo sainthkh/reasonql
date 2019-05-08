@@ -27,17 +27,20 @@ ${type.fields.map(field => {
 
   if(field.scalar) {
     return `    ${varname},`;
-  } else if (field.enum) {
-    let [_, typeName] = field.type.split('.');
-    typeName = upperTheFirstCharacter(typeName);
-    enumTypes.add(typeName);
-    return `    decode${typeName}(${varname}),`;
   } else if(field.fragment) {
     let [component, typeName] = field.type.split('.');
     typeName = upperTheFirstCharacter(typeName);
     return `    ${component}_decode${typeName}(res),`
   } else {
-    let validType = upperTheFirstCharacter(field.typeName);
+    let validType = "";
+    if(field.enum) {
+      let [_, typeName] = field.type.split('.');
+      typeName = upperTheFirstCharacter(typeName);
+      enumTypes.add(typeName);
+      validType = typeName;
+    } else {
+      validType = upperTheFirstCharacter(field.typeName);
+    }
     let decoderName = field.array
       ? `decode${validType}Array`
       : `decode${validType}`;
