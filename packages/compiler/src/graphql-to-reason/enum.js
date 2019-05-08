@@ -31,8 +31,8 @@ ${type.values.map((v, i) => `    "${v}",`).join('\n')}
   return t[en];
 }
 
-exports.decodePatchSize = decodePatchSize;
-exports.encodePatchSize = encodePatchSize;
+exports.decode${type.name} = decode${type.name};
+exports.encode${type.name} = encode${type.name};
 |}]
 `.trim())
 .join('\n\n');
