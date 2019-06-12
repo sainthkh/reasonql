@@ -174,17 +174,21 @@ function argumentTypes(args, typeMap) {
   return list;
 }
 
+let scalarTypes = {
+  "ID": "string",
+  "String": "string",
+  "Boolean": "bool",
+  "Int": "int",
+  "Float": "float",
+};
+
+function isScalar(type) {
+  return type in scalarTypes;
+}
+
 function getValidTypeName(types, unconflictedNames, typeName) {
   if(isScalar(typeName)) {
-    let typeNames = {
-      "ID": "string",
-      "String": "string",
-      "Boolean": "bool",
-      "Int": "int",
-      "Float": "float",
-    };
-
-    return typeNames[typeName];
+    return scalarTypes[typeName];
   } else if(isFragmentTypeName(typeName)) {
     return typeName;
   } else if(typeName.includes('#')) { // For fragment type definition.
@@ -203,11 +207,6 @@ function getValidTypeName(types, unconflictedNames, typeName) {
 
     return lowerTheFirstCharacter(name);
   }
-}
-
-function isScalar(type) {
-  let scalarTypes = ["ID", "String", "Int", "Float", "Boolean"];
-  return scalarTypes.includes(type);
 }
 
 function isRootName(type) {
@@ -261,8 +260,15 @@ function decodeType(name, field) {
 }
 
 function createTypeMap(ast) {
-  let types = {}
+  let types = {};
   let enums = [];
+  console.log(JSON.stringify(ast));
+  ast.definitions
+  .filter(def => def.kind == "ScalarTypeDefinition")
+  .forEach(def => {
+    scalarTypes[def.name.value] = "string"
+  });
+
   ast.definitions
   .filter(def => def.kind == "EnumTypeDefinition")
   .forEach(def => {
