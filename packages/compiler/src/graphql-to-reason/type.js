@@ -1,26 +1,16 @@
 const { lowerTheFirstCharacter } = require('./util');
 
-function makeTypeList(queryRoot, isFragment, typeMap) {
+function makeTypeList(queryRoot, roots, isFragment, typeMap) {
   let types = {};
   let rootType = isFragment 
     ? queryRoot.typeCondition.name.value
-    : operationToTypeName(queryRoot.operation);
+    : roots[queryRoot.operation];
   extractType(types, queryRoot, [], typeMap, rootType);
 
   let typeList = childTypes(types, types[rootType]);
   typeList = validTypeNames(types, typeList);
 
   return typeList;
-}
-
-function operationToTypeName(operation) {
-  let names = {
-    "query": "Query",
-    "mutation": "Mutation",
-    "subscription": "Subscription",
-  };
-
-  return names[operation];
 }
 
 function extractType(types, ast, selectionNames, typeMap, currentType, userDefinedTypeName) {
@@ -71,7 +61,7 @@ function extractType(types, ast, selectionNames, typeMap, currentType, userDefin
         }
       }
     }
-  })
+  });
   
   let name = [...selectionNames, currentType].join('_');
   types[name] = {

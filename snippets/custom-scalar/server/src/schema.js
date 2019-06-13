@@ -2,7 +2,7 @@ const { gql } = require('apollo-server');
 
 const typeDefs = gql`
 schema {
-  query: Query
+  query: query_root
 }
 
 scalar uuid
@@ -15,7 +15,7 @@ type accounts {
   updated_at: timestamptz!
 }
 
-type Query {
+type query_root {
   accounts: [accounts!]!
 }
 `
