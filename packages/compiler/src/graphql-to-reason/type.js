@@ -66,7 +66,8 @@ function extractType(types, ast, selectionNames, typeMap, currentType, userDefin
           type: isScalar(typeName)
             ? typeName
             : [...selectionNames, name, typeName].join('_'),
-          scalar: isScalar(typeName)
+          scalar: isScalar(typeName),
+          isBuiltinScalar: isBuiltinScalar(typeName)
         }
       }
     }
@@ -182,6 +183,16 @@ let scalarTypes = {
   "Float": "float",
 };
 
+function isBuiltinScalar(type) {
+  return type in {
+    "ID": "string",
+    "String": "string",
+    "Boolean": "bool",
+    "Int": "int",
+    "Float": "float",
+  };
+}
+
 function isScalar(type) {
   return type in scalarTypes;
 }
@@ -262,11 +273,10 @@ function decodeType(name, field) {
 function createTypeMap(ast) {
   let types = {};
   let enums = [];
-  console.log(JSON.stringify(ast));
   ast.definitions
   .filter(def => def.kind == "ScalarTypeDefinition")
   .forEach(def => {
-    scalarTypes[def.name.value] = "string"
+    scalarTypes[def.name.value] = lowerTheFirstCharacter(def.name.value);
   });
 
   ast.definitions

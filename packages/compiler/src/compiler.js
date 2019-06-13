@@ -143,7 +143,7 @@ function generateEnumTypesFile({ src }, ast) {
   }
 }
 
-function generateTypeFiles({include, exclude, src}, schemaAst) {
+function generateTypeFiles({include, exclude, src, insert=""}, schemaAst) {
   console.log('analyzing reason files...');
   let typeMap = createTypeMap(schemaAst);
 
@@ -167,12 +167,12 @@ function generateTypeFiles({include, exclude, src}, schemaAst) {
   console.log('generating type files...');
   const DEST_DIR = path.join(src, '.reasonql');
   nodes.forEach(node => {
-    generateTypeFile(DEST_DIR, node, typeMap);
+    generateTypeFile(DEST_DIR, node, typeMap, insert);
   })
 }
 
-function generateTypeFile(DEST_DIR, node, typeMap) {
-  let code = generateReasonCode(node, typeMap);
+function generateTypeFile(DEST_DIR, node, typeMap, insert) {
+  let code = `${insert}\n${generateReasonCode(node, typeMap)}`;
   fs.writeFileSync(path.join(DEST_DIR, `${node.fileName}.re`), code);
 }
 
