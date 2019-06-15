@@ -57,7 +57,7 @@ function extractType(types, ast, selectionNames, typeMap, currentType, userDefin
             ? typeName
             : [...selectionNames, name, typeName].join('_'),
           scalar: isScalar(typeName),
-          isBuiltinScalar: isBuiltinScalar(typeName)
+          isBuiltinScalar: isBuiltinScalar(typeName),
         }
       }
     }
@@ -73,6 +73,7 @@ function extractType(types, ast, selectionNames, typeMap, currentType, userDefin
       : currentType,
     fields,
     userDefinedTypeName,
+    isRootType: ast.kind == "OperationDefinition",
   }
 }
 
@@ -197,22 +198,17 @@ function getValidTypeName(types, unconflictedNames, typeName) {
   } else if(types['variablesType']) {
     return lowerTheFirstCharacter(typeName);
   } else {
-    let {selectionName, userDefinedTypeName} = types[typeName];
+    let {selectionName, userDefinedTypeName, isRootType=false} = types[typeName];
     let name = 
       userDefinedTypeName 
         ? userDefinedTypeName
         : unconflictedNames.includes(selectionName)
           ? selectionName
           : typeName
-    name = isRootName(name) ? "queryResult" : name;
+    name = isRootType ? "queryResult" : name;
 
     return lowerTheFirstCharacter(name);
   }
-}
-
-function isRootName(type) {
-  let names = ["Query", "Mutation", "Subscription"];
-  return names.includes(type);
 }
 
 function isFragmentTypeName(type) {
