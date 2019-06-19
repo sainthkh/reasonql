@@ -1,5 +1,5 @@
 {
-  "name": "hello-world-client",
+  "name": "custom-scalar-client",
   "version": "0.1.0",
   "scripts": {
     "build": "bsb -make-world",
