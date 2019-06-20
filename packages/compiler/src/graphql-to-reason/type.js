@@ -1,26 +1,16 @@
 const { lowerTheFirstCharacter } = require('./util');
 
-function makeTypeList(queryRoot, isFragment, typeMap) {
+function makeTypeList(queryRoot, roots, isFragment, typeMap) {
   let types = {};
   let rootType = isFragment 
     ? queryRoot.typeCondition.name.value
-    : operationToTypeName(queryRoot.operation);
+    : roots[queryRoot.operation];
   extractType(types, queryRoot, [], typeMap, rootType);
 
   let typeList = childTypes(types, types[rootType]);
   typeList = validTypeNames(types, typeList);
 
   return typeList;
-}
-
-function operationToTypeName(operation) {
-  let names = {
-    "query": "Query",
-    "mutation": "Mutation",
-    "subscription": "Subscription",
-  };
-
-  return names[operation];
 }
 
 function extractType(types, ast, selectionNames, typeMap, currentType, userDefinedTypeName) {
@@ -66,11 +56,12 @@ function extractType(types, ast, selectionNames, typeMap, currentType, userDefin
           type: isScalar(typeName)
             ? typeName
             : [...selectionNames, name, typeName].join('_'),
-          scalar: isScalar(typeName)
+          scalar: isScalar(typeName),
+          isBuiltinScalar: isBuiltinScalar(typeName),
         }
       }
     }
-  })
+  });
   
   let name = [...selectionNames, currentType].join('_');
   types[name] = {
@@ -82,6 +73,7 @@ function extractType(types, ast, selectionNames, typeMap, currentType, userDefin
       : currentType,
     fields,
     userDefinedTypeName,
+    isRootType: ast.kind == "OperationDefinition",
   }
 }
 
@@ -174,17 +166,31 @@ function argumentTypes(args, typeMap) {
   return list;
 }
 
+let scalarTypes = {
+  "ID": "string",
+  "String": "string",
+  "Boolean": "bool",
+  "Int": "int",
+  "Float": "float",
+};
+
+function isBuiltinScalar(type) {
+  return type in {
+    "ID": "string",
+    "String": "string",
+    "Boolean": "bool",
+    "Int": "int",
+    "Float": "float",
+  };
+}
+
+function isScalar(type) {
+  return type in scalarTypes;
+}
+
 function getValidTypeName(types, unconflictedNames, typeName) {
   if(isScalar(typeName)) {
-    let typeNames = {
-      "ID": "string",
-      "String": "string",
-      "Boolean": "bool",
-      "Int": "int",
-      "Float": "float",
-    };
-
-    return typeNames[typeName];
+    return scalarTypes[typeName];
   } else if(isFragmentTypeName(typeName)) {
     return typeName;
   } else if(typeName.includes('#')) { // For fragment type definition.
@@ -192,27 +198,17 @@ function getValidTypeName(types, unconflictedNames, typeName) {
   } else if(types['variablesType']) {
     return lowerTheFirstCharacter(typeName);
   } else {
-    let {selectionName, userDefinedTypeName} = types[typeName];
+    let {selectionName, userDefinedTypeName, isRootType=false} = types[typeName];
     let name = 
       userDefinedTypeName 
         ? userDefinedTypeName
         : unconflictedNames.includes(selectionName)
           ? selectionName
           : typeName
-    name = isRootName(name) ? "queryResult" : name;
+    name = isRootType ? "queryResult" : name;
 
     return lowerTheFirstCharacter(name);
   }
-}
-
-function isScalar(type) {
-  let scalarTypes = ["ID", "String", "Int", "Float", "Boolean"];
-  return scalarTypes.includes(type);
-}
-
-function isRootName(type) {
-  let names = ["Query", "Mutation", "Subscription"];
-  return names.includes(type);
 }
 
 function isFragmentTypeName(type) {
@@ -261,8 +257,14 @@ function decodeType(name, field) {
 }
 
 function createTypeMap(ast) {
-  let types = {}
+  let types = {};
   let enums = [];
+  ast.definitions
+  .filter(def => def.kind == "ScalarTypeDefinition")
+  .forEach(def => {
+    scalarTypes[def.name.value] = lowerTheFirstCharacter(def.name.value);
+  });
+
   ast.definitions
   .filter(def => def.kind == "EnumTypeDefinition")
   .forEach(def => {

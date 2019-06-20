@@ -2,11 +2,11 @@ const {parse} = require('graphql');
 const {makeTypeList, argumentTypes} = require('./type');
 const {generateDecoder} = require('./codec');
 
-function generateNodes(gqlCodes, typeMap) {
+function generateNodes(gqlCodes, typeMap, operationRoots) {
   let nodes = gqlCodes.map(code => {
     let ast = parse(code.template);
     let queryRoot = ast.definitions[0];
-
+    
     let name = queryRoot.name.value;
     let isFragment = queryRoot.kind == "FragmentDefinition";
     
@@ -15,9 +15,9 @@ function generateNodes(gqlCodes, typeMap) {
       : name;
     let typeList = isFragment
       ? ast.definitions
-        .map(def => makeTypeList(def, isFragment, typeMap))
+        .map(def => makeTypeList(def, operationRoots, isFragment, typeMap))
         .reduce((prev, current) => [...prev, ...current], [])
-      : makeTypeList(queryRoot, isFragment, typeMap);
+      : makeTypeList(queryRoot, operationRoots, isFragment, typeMap);
 
     return {
       code: code.template.trim(),

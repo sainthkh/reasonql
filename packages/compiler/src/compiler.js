@@ -143,9 +143,24 @@ function generateEnumTypesFile({ src }, ast) {
   }
 }
 
-function generateTypeFiles({include, exclude, src}, schemaAst) {
+function extractOperationRoot(ast){
+  let operationRoots = {
+    "query": "Query",
+    "mutation": "Mutation",
+    "subscription": "Subscription",
+  };
+  const schemaDefs = ast.definitions.filter(a => a.kind=="SchemaDefinition");
+  if (schemaDefs.length > 0) {
+    const schemaDef = schemaDefs[0];
+    schemaDef.operationTypes.forEach(a => operationRoots[a.operation]=a.type.name.value);
+  }
+  return operationRoots;
+}
+
+function generateTypeFiles({include, exclude, src, insert=""}, schemaAst) {
   console.log('analyzing reason files...');
   let typeMap = createTypeMap(schemaAst);
+  const operationRoots = extractOperationRoot(schemaAst);
 
   include = Array.isArray(include) ? include : [include];
   const patterns = include.map(inc => `${inc}/*.re`);
@@ -162,17 +177,17 @@ function generateTypeFiles({include, exclude, src}, schemaAst) {
     gqlCodes = gqlCodes.concat(findTags(code));
   });
 
-  let nodes = generateNodes(gqlCodes, typeMap);
+  let nodes = generateNodes(gqlCodes, typeMap, operationRoots);
 
   console.log('generating type files...');
   const DEST_DIR = path.join(src, '.reasonql');
   nodes.forEach(node => {
-    generateTypeFile(DEST_DIR, node, typeMap);
+    generateTypeFile(DEST_DIR, node, typeMap, insert);
   })
 }
 
-function generateTypeFile(DEST_DIR, node, typeMap) {
-  let code = generateReasonCode(node, typeMap);
+function generateTypeFile(DEST_DIR, node, typeMap, insert) {
+  let code = `${insert}\n${generateReasonCode(node, typeMap)}`;
   fs.writeFileSync(path.join(DEST_DIR, `${node.fileName}.re`), code);
 }
 

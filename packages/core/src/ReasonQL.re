@@ -44,13 +44,13 @@ module MakeRequest = (Q: Query, C: Client) => {
 
   [@bs.val]external fetch: (string, Js.Json.t) => Js.Promise.t(response) = "";
 
-  let send: Q.variablesType => Js.Promise.t(apolloResultJs) = vars => {
+  let send = (~headers=Js.Obj.empty(), ~vars: Q.variablesType): Js.Promise.t(apolloResultJs) => {
     open Js.Promise;
     fetch(C.url, Obj.magic({
       "method": "POST",
-      "headers": {
-        "Content-Type": "application/json",
-      },
+      "headers": Js.Obj.assign({
+        "Content-Type": "application/json"
+      }, headers),
       "body": Js.Json.stringify(Obj.magic({
         "query": Q.query,
         "variables": Q.encodeVariables(vars),

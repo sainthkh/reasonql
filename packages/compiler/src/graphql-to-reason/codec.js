@@ -25,7 +25,7 @@ var ${functionName} = function (res) {
 ${type.fields.map(field => {
   let varname = `res.${field.name}`;
 
-  if(field.scalar) {
+  if(field.isBuiltinScalar) {
     return `    ${varname},`;
   } else if(field.fragment) {
     let [component, typeName] = field.type.split('.');
