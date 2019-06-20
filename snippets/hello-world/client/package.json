@@ -17,7 +17,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@reasonql"^0.2.0",
+    "@reasonql/core": "^0.2.0",
     "react": "^16.8.3",
     "react-dom": "^16.8.3",
     "reason-react": "^0.5.3"
