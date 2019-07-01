@@ -67,25 +67,21 @@ module MakeRequest = (Q: Query, C: Client) => {
     );
   };
 
-  let finished: (Js.Promise.t(apolloResultJs), Q.queryResult => unit) => unit =
-    (promise, f) => {
+  let finished: Js.Promise.t(apolloResultJs) => Js.Promise.t(Q.queryResult) =
+    promise => {
       Js.Promise.(
         promise
         |> then_(json => {
              let data = Q.decodeQueryResult(json##data);
-             resolve(f(data));
+             resolve(data);
            })
-        |> ignore
       );
     };
 
   let finishedWithError:
-    (
-      Js.Promise.t(apolloResultJs),
-      (Q.queryResult, option(array(apolloError))) => unit
-    ) =>
-    unit =
-    (promise, f) => {
+    Js.Promise.t(apolloResultJs) =>
+    Js.Promise.t((Q.queryResult, option(array(apolloError)))) =
+    promise => {
       Js.Promise.(
         promise
         |> then_(json => {
@@ -95,10 +91,8 @@ module MakeRequest = (Q: Query, C: Client) => {
                | Some(errors) => Some(decodeError(errors))
                | None => None
                };
-
-             resolve(f(data, errors));
+             resolve((data, errors));
            })
-        |> ignore
       );
     };
 };
