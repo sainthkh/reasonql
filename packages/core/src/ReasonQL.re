@@ -17,7 +17,10 @@ let decodeError: array(apolloErrorJs) => array(apolloError) =
     |> Array.map(err => {message: err##message, extensions: err##extensions});
   };
 
-module type Client = {let url: string;};
+module type Client = {
+  let url: string;
+  let headers: Js.t({..});
+};
 
 module type Query = {
   let query: string;
@@ -53,7 +56,10 @@ module MakeRequest = (Q: Query, C: Client) => {
         Obj.magic({
           "method": "POST",
           "headers":
-            Js.Obj.assign({"Content-Type": "application/json"}, headers),
+            Js.Obj.assign(
+              Js.Obj.assign({"Content-Type": "application/json"}, C.headers),
+              headers,
+            ),
           "body":
             Js.Json.stringify(
               Obj.magic({
