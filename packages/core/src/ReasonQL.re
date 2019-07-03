@@ -86,17 +86,18 @@ module MakeRequest = (Q: Query, C: Client) => {
 
   let finishedWithError:
     Js.Promise.t(apolloResultJs) =>
-    Js.Promise.t((Q.queryResult, option(array(apolloError)))) =
+    Js.Promise.t((option(Q.queryResult), option(array(apolloError)))) =
     promise => {
       Js.Promise.(
         promise
         |> then_(json => {
-             let data = Q.decodeQueryResult(json##data);
              let errors =
                switch (json##errors) {
                | Some(errors) => Some(decodeError(errors))
                | None => None
                };
+             let data =
+               errors == None ? Some(Q.decodeQueryResult(json##data)) : None;
              resolve((data, errors));
            })
       );
