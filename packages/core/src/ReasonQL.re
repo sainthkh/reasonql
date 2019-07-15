@@ -73,7 +73,8 @@ module MakeRequest = (Q: Query, C: Client) => {
     );
   };
 
-  let finished: Js.Promise.t(apolloResultJs) => Js.Promise.t(Q.queryResult) =
+  let finishedPromise:
+    Js.Promise.t(apolloResultJs) => Js.Promise.t(Q.queryResult) =
     promise => {
       Js.Promise.(
         promise
@@ -84,7 +85,16 @@ module MakeRequest = (Q: Query, C: Client) => {
       );
     };
 
-  let finishedWithError:
+  let finished: (Js.Promise.t(apolloResultJs), Q.queryResult => unit) => unit =
+    (result, callback) =>
+      Js.Promise.(
+        result
+        |> finishedPromise
+        |> then_(decoded => callback(decoded) |> resolve)
+        |> ignore
+      );
+
+  let finishedWithErrorPromise:
     Js.Promise.t(apolloResultJs) =>
     Js.Promise.t((option(Q.queryResult), option(array(apolloError)))) =
     promise => {
@@ -102,4 +112,18 @@ module MakeRequest = (Q: Query, C: Client) => {
            })
       );
     };
+
+  let finishedWithError:
+    (
+      Js.Promise.t(apolloResultJs),
+      (option(Q.queryResult), option(array(apolloError))) => unit
+    ) =>
+    unit =
+    (result, callback) =>
+      Js.Promise.(
+        result
+        |> finishedWithErrorPromise
+        |> then_(((decoded, error)) => callback(decoded, error) |> resolve)
+        |> ignore
+      );
 };
