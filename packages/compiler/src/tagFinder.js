@@ -1,12 +1,12 @@
 const lineColumn = require('line-column');
 
 function findTags(text) {
-  let re = /gql\(\s*{\|([\s\S]*?)\|}\s*\)/g;
+  let re = /gql\(\s*{\|([\s\S]*?)\|}[\s,]*\)/g;
 
   let tags = [];
   let result;
   while ((result = re.exec(text)) !== null) {
-    let {line, col: column} = lineColumn(text, result.index);
+    let { line, col: column } = lineColumn(text, result.index);
     tags.push({
       template: result[1],
       sourceLocationOffset: {

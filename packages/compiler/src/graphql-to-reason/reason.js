@@ -100,8 +100,17 @@ ${
   }).join('\n\n');
 }
 
+let scalarTypes = {
+  "id": "string",
+  "string": "string",
+  "boolean": "bool",
+  "int": "int",
+  "float": "float",
+  "smallint": "int",
+};
+
 function wrapTypeName(field) {
-  let typeName = field.typeName;
+  let typeName = scalarTypes[field.typeName] || field.typeName;
 
   typeName = field.contentOption
     ? `option(${typeName})`
