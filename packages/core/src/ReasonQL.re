@@ -17,6 +17,10 @@ let decodeError: array(apolloErrorJs) => array(apolloError) =
     |> Array.map(err => {message: err##message, extensions: err##extensions});
   };
 
+type result('a, 'b) =
+  | Ok('a)
+  | Error('b);
+
 module type Client = {
   let url: string;
   let headers: Js.t({..});
@@ -96,20 +100,20 @@ module MakeRequest = (Q: Query, C: Client) => {
 
   let finishedWithErrorPromise:
     Js.Promise.t(apolloResultJs) =>
-    Js.Promise.t((option(Q.queryResult), option(array(apolloError)))) =
+    Js.Promise.t(result(Q.queryResult, array(apolloError))) =
     promise => {
-      Js.Promise.(
-        promise
-        |> then_(json => {
-             let errors =
-               switch (json##errors) {
-               | Some(errors) => Some(decodeError(errors))
-               | None => None
+      Utils.(
+        Js.Promise.(
+          promise
+          |> then_(json => {
+               let errors =
+                 json##errors -?> (errors => Error(decodeError(errors)));
+               switch (errors) {
+               | Some(errors) => errors |> resolve
+               | None => Ok(Q.decodeQueryResult(json##data)) |> resolve
                };
-             let data =
-               errors == None ? Some(Q.decodeQueryResult(json##data)) : None;
-             resolve((data, errors));
-           })
+             })
+        )
       );
     };
 
@@ -123,7 +127,12 @@ module MakeRequest = (Q: Query, C: Client) => {
       Js.Promise.(
         result
         |> finishedWithErrorPromise
-        |> then_(((decoded, error)) => callback(decoded, error) |> resolve)
+        |> then_(output =>
+             switch (output) {
+             | Ok(data) => callback(Some(data), None) |> resolve
+             | Error(errors) => callback(None, Some(errors)) |> resolve
+             }
+           )
         |> ignore
       );
 };
